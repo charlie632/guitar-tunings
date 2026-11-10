@@ -206,7 +206,7 @@ function Popover({ id, label, wide, onClose, children }: {
     if (!backdrop.current || getComputedStyle(backdrop.current).display === "none") return;
     setModal(true);
     const dialog = ref.current!;
-    const outside = Array.from(document.querySelectorAll<HTMLElement>(".shell > *, .toolbar > *")).filter(
+    const outside = Array.from(document.querySelectorAll<HTMLElement>(".shell > *, .rail > *, .toolbar > *")).filter(
       (el) => !el.contains(dialog),
     );
     outside.forEach((el) => (el.inert = true));
