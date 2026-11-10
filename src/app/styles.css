@@ -17,6 +17,9 @@
   --deg-6: #b794f6;
   --deg-7: #f78fb3;
   --ink: #10131a;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   color-scheme: dark;
 }
 
@@ -26,10 +29,38 @@ html, body { margin: 0; background: var(--bg); color: var(--text); }
 body {
   font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
 }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+output, .frets, .numeral, .stringchip, .hint strong { font-variant-numeric: tabular-nums; }
 
 button, select, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
+
+/* Press feedback and state transitions for everything clickable. */
+.btn, .seg button, .pill, .step-btn, .scales button, .chord, .chord .chip, .chord .add, .fit, .capo-opt, .diagram, .step {
+  transition: transform 160ms var(--ease-out), border-color 150ms ease, background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+.btn:active:not(:disabled), .seg button:active, .pill:active, .step-btn:active:not(:disabled), .scales button:active, .chord:active {
+  transform: scale(0.97);
+}
+.fit:active, .capo-opt:active, .diagram:active { transform: scale(0.985); }
+
+@media (hover: hover) and (pointer: fine) {
+  .pill:hover:not([aria-expanded="true"]),
+  .btn:hover:not(.primary, [aria-checked="true"], :disabled),
+  .seg button:hover:not([aria-checked="true"], [aria-pressed="true"]),
+  .scales button:hover:not([aria-checked="true"]),
+  .fit:hover:not([aria-current="true"]),
+  .capo-opt:hover:not([aria-current="true"]),
+  .diagram:hover { border-color: var(--muted); }
+  .step-btn:hover:not(:disabled) { background: var(--panel-2); }
+  .chord .add:hover { color: var(--accent); }
+  .dot:hover circle.body { filter: brightness(1.15); }
+}
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
 
 .shell { max-width: 1180px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; }
@@ -48,25 +79,31 @@ header.top p { margin: 2px 0 0; color: var(--muted); }
 
 .toolbar {
   position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px;
-  margin: 0 -16px; padding: 8px 16px; background: var(--bg);
+  margin: 0 -16px; padding: 8px 16px;
   border-bottom: 1px solid var(--line);
+}
+/* The blur sits on a pseudo-element: backdrop-filter on the toolbar itself would trap the fixed bottom sheets inside it. */
+.toolbar::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: rgb(14 17 23 / 0.8);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
 }
 .pillwrap { position: relative; display: flex; }
 .pill {
   display: grid; justify-items: start; gap: 0; text-align: left; line-height: 1.2; min-height: 44px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 5px 12px;
 }
-.pill:hover { border-color: var(--muted); }
 .pill[aria-expanded="true"] { border-color: var(--accent); }
 .pill-k { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .pill-v { font-weight: 700; color: var(--accent); white-space: nowrap; display: flex; align-items: baseline; gap: 6px; }
 .pill-v small { color: var(--muted); font-weight: 400; font-size: 0.78rem; }
+.pill-v output { min-width: 2ch; }
 .capo-pill { position: relative; display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
 .capo-pill .pillwrap { position: static; }
 .capo-pill .pill { border: 0; border-radius: 0; background: transparent; }
 .capo-pill .pill[aria-expanded="true"] { box-shadow: inset 0 -2px 0 var(--accent); }
 .step-btn { background: transparent; border: 0; width: 36px; font-size: 1.15rem; font-weight: 700; color: var(--text); border-radius: 10px; }
-.step-btn:hover:not(:disabled) { background: var(--panel-2); }
 .step-btn:disabled { color: var(--line); cursor: default; }
 
 .popover {
@@ -74,9 +111,14 @@ header.top p { margin: 2px 0 0; color: var(--muted); }
   max-height: calc(100dvh - 120px); overflow: auto; display: grid; gap: 10px;
   background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
   box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+  transform-origin: top left;
+  transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+@starting-style {
+  .popover { opacity: 0; transform: translateY(-4px) scale(0.97); }
 }
 .popover.wide { width: 620px; }
-.capo-pill .popover { left: auto; right: 0; width: 300px; }
+.capo-pill .popover { left: auto; right: 0; width: 300px; transform-origin: top right; }
 .sheet-head { display: flex; justify-content: space-between; align-items: center; }
 .sheet-head strong { font-size: 0.95rem; }
 .sheet-backdrop { display: none; }
@@ -93,8 +135,16 @@ header.top p { margin: 2px 0 0; color: var(--muted); }
   .popover, .popover.wide, .capo-pill .popover {
     position: fixed; top: auto; left: 0; right: 0; bottom: 0; width: auto; max-width: none; max-height: 75dvh; overscroll-behavior: contain;
     border-radius: 16px 16px 0 0; border-bottom: 0; padding: 14px 16px 24px;
+    transition: transform 320ms var(--ease-drawer);
   }
-  .sheet-backdrop { display: block; position: fixed; inset: 0; z-index: 25; background: rgb(0 0 0 / 0.55); }
+  @starting-style {
+    .popover { opacity: 1; transform: translateY(100%); }
+    .sheet-backdrop { opacity: 0; }
+  }
+  .sheet-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 25; background: rgb(0 0 0 / 0.55);
+    transition: opacity 240ms ease;
+  }
   .popover .scales { grid-template-columns: 1fr 1fr; }
 }
 .field { display: grid; gap: 6px; align-content: start; min-width: 0; }
@@ -114,7 +164,6 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .seg button[aria-pressed="true"], .seg button[aria-checked="true"], .tonics button[aria-checked="true"], .btn.primary {
   background: var(--accent); color: var(--ink); border-color: var(--accent); font-weight: 600;
 }
-.btn:hover:not(.primary), .seg button:hover { border-color: var(--muted); }
 .btn.small { min-height: 30px; padding: 3px 8px; font-size: 0.85rem; }
 
 .tonics { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
@@ -137,8 +186,20 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 8px 0 0; padding: 0; list-style: none; font-size: 0.82rem; color: var(--muted); }
 .legend li { display: flex; align-items: center; gap: 5px; }
 .swatch { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-.dot { cursor: pointer; }
+.dot {
+  cursor: pointer; transform-box: fill-box; transform-origin: center;
+  transition: transform 160ms var(--ease-out), opacity 200ms ease-out;
+}
+@starting-style {
+  .dot { opacity: 0; }
+}
+.dot:active { transform: scale(0.88); }
+.dot circle.body { transition: filter 150ms ease; }
 .dot:focus-visible { outline: none; }
+.capo-mark { transition: transform 240ms var(--ease-in-out), opacity 160ms ease-out; }
+@starting-style {
+  .capo-mark { opacity: 0; }
+}
 .dot:focus-visible circle.body { stroke: var(--focus); stroke-width: 3; }
 
 .fits { display: grid; gap: 8px; }
@@ -185,7 +246,6 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .chord .chip[aria-pressed="true"] small { color: var(--ink); }
 .chord.color .chip { padding: 2px 8px; font-size: 0.9rem; }
 .chord .add { border: 0; border-left: 1px solid var(--line); background: transparent; width: 28px; font-weight: 700; color: var(--muted); }
-.chord .add:hover { color: var(--accent); }
 .chord.borrowed { border-style: dashed; }
 
 .why { background: var(--panel-2); border-radius: 8px; padding: 10px 12px; margin: 0 0 12px; display: grid; gap: 6px; }
@@ -200,7 +260,6 @@ input[aria-invalid="true"] { border-color: var(--bad); }
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 6px; display: grid; gap: 4px;
   justify-items: center; text-align: center; width: 100%;
 }
-.diagram:hover { border-color: var(--muted); }
 .diagram svg { width: 100%; max-width: 132px; height: auto; }
 .diagram .name { font-weight: 700; }
 .diagram .frets { font-family: ui-monospace, Menlo, monospace; color: var(--muted); font-size: 0.8rem; letter-spacing: 0.1em; }
@@ -214,7 +273,7 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 
 .steps { display: grid; grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); gap: 10px; margin: 10px 0; padding: 0; list-style: none; }
 .step { background: var(--panel-2); border: 2px solid var(--line); border-radius: 10px; padding: 8px; display: grid; gap: 6px; justify-items: center; min-width: 0; }
-.step[aria-current="step"] { border-color: var(--accent); }
+.step[aria-current="step"] { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(255 180 84 / 0.18); }
 .step header { display: flex; justify-content: space-between; align-items: baseline; width: 100%; gap: 6px; }
 .step header b { font-size: 1.05rem; }
 .step header span { color: var(--muted); font-size: 0.8rem; }
@@ -224,6 +283,8 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .transport { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-top: 8px; }
 .transport label { display: flex; align-items: center; gap: 8px; }
 .transport input[type="range"] { width: 140px; accent-color: var(--accent); }
+.transport output { min-width: 3ch; }
+.transport .btn.primary { min-width: 6.5rem; }
 .addrow { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .addrow input { width: 12em; }
 
@@ -231,3 +292,12 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 footer { color: var(--muted); font-size: 0.82rem; padding: 8px 0 24px; }
+
+/* Keep the fades, drop the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .popover, .popover.wide, .capo-pill .popover { transition: opacity 160ms ease; }
+  @starting-style {
+    .popover { opacity: 0; transform: none; }
+  }
+  .capo-mark { transition: opacity 160ms ease; }
+}

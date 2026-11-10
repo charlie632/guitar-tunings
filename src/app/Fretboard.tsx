@@ -96,7 +96,8 @@ export function Fretboard({ ex, labels, onLabels, onPluck }: Props) {
           ))}
           {board.capo > 0 && (
             <rect
-              x={LEFT + board.capo * W + 3} y={TOP - 16} width="12" height={(n - 1) * GAP + 32} rx="5"
+              className="capo-mark" style={{ transform: `translateX(${board.capo * W}px)` }}
+              x={LEFT + 3} y={TOP - 16} width="12" height={(n - 1) * GAP + 32} rx="5"
               fill="#ffb454" stroke="#10131a"
             >
               <title>{`Capo at fret ${board.capo}`}</title>
