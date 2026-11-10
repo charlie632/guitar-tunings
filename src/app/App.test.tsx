@@ -53,6 +53,8 @@ describe("App on DADF♯Ae in D major", () => {
     const voicings = panel(/Voicings for Dadd9/);
     expect(voicings.getAllByText("6 open strings ring").length).toBeGreaterThan(0);
     expect(voicings.getAllByText("0 0 0 0 0 0").length).toBeGreaterThan(0);
+    const switcher = within(screen.getByRole("group", { name: "Chords in D major" }));
+    expect(switcher.getByRole("button", { name: /Dadd9/, pressed: true })).toBeTruthy();
   });
 
   test("the voicings section switches chords without leaving it", () => {
