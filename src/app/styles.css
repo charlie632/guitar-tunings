@@ -140,9 +140,9 @@ button { cursor: pointer; }
   .rail .popover, .rail .popover.wide, .rail .capo-pill .popover { top: auto; left: 0; right: 0; max-height: 75dvh; }
 
   .sections { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--panel); border-top: 1px solid var(--line); padding: 0 4px env(safe-area-inset-bottom); }
-  .sections ul { grid-template-columns: repeat(4, 1fr); gap: 0; }
+  .sections ul { grid-template-columns: repeat(4, minmax(max-content, 1fr)); gap: 0; }
   .sections a {
-    border-left: 0; border-top: 3px solid transparent; border-radius: 0; padding: 14px 2px 15px; text-align: center; font-size: 0.82rem;
+    border-left: 0; border-top: 3px solid transparent; border-radius: 0; padding: 14px 8px 15px; text-align: center; font-size: 0.82rem;
   }
   .sections a[aria-current="page"] { background: transparent; border-top-color: var(--accent); color: var(--accent); }
   .selbar { bottom: 72px; }
