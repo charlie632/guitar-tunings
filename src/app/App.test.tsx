@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { App } from "./App";
 
 beforeEach(() => {
   window.history.replaceState(null, "", "/");
-  window.scrollTo = () => {};
+  vi.spyOn(window, "scrollTo").mockImplementation(() => {});
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 const panel = (name: RegExp) => within(screen.getByRole("region", { name }));
 const go = (name: string) => fireEvent.click(within(screen.getByRole("navigation", { name: "Sections" })).getByRole("link", { name }));
