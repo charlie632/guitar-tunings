@@ -64,8 +64,9 @@ button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
 
 .shell {
+  --rail-w: 248px;
   max-width: 1320px; margin: 0 auto; padding: 16px; display: grid; gap: 16px;
-  grid-template-columns: 248px minmax(0, 1fr); grid-template-rows: auto 1fr;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr); grid-template-rows: auto 1fr;
   grid-template-areas: "brand main" "rail main";
 }
 .shell > * { min-width: 0; }
@@ -92,8 +93,8 @@ button { cursor: pointer; }
 .rail .pill { width: 100%; }
 .rail .capo-pill .pillwrap { flex: 1; }
 .rail .popover, .rail .popover.wide, .rail .capo-pill .popover {
-  position: fixed; top: 16px; left: max(280px, calc((100vw - 1320px) / 2 + 280px)); right: auto;
-  max-height: calc(100dvh - 32px); transform-origin: top left;
+  top: 0; left: calc(100% + 12px); right: auto; transform-origin: top left;
+  max-width: calc(100vw - var(--rail-w) - 60px);
 }
 .setup::before {
   content: "Setup"; display: block; margin: 0 0 6px 2px;
