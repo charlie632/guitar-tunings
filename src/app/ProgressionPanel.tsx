@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type Dispatch, type FormEvent } from "react";
-import { parseRoman, type Exploration, type ProgressionTag, type RomanChord } from "../theory";
+import { parseRoman, type Chord, type Exploration, type ProgressionTag, type RomanChord } from "../theory";
 import type { Player } from "../audio/player";
 import { ChordDiagram } from "./ChordDiagram";
 import type { AppAction } from "./settings";
@@ -10,12 +10,13 @@ interface Props {
   pins: Readonly<Record<number, string>>;
   dispatch: Dispatch<AppAction>;
   player: Player;
+  onOpenChord: (chord: Chord) => void;
 }
 
 const TAGS: readonly ProgressionTag[] = ["pop", "emo", "midwest", "modal", "minor", "jazz"];
 const DEFAULT_BPM = 84;
 
-export function ProgressionPanel({ ex, romans, pins, dispatch, player }: Props) {
+export function ProgressionPanel({ ex, romans, pins, dispatch, player, onOpenChord }: Props) {
   const prog = useMemo(() => ex.progression(romans, pins), [ex, romans, pins]);
   const library = useMemo(() => ex.library(), [ex]);
   const [tag, setTag] = useState<ProgressionTag | "all">("all");
@@ -52,12 +53,12 @@ export function ProgressionPanel({ ex, romans, pins, dispatch, player }: Props) 
     <section className="panel" aria-labelledby="prog-h">
       <h2 id="prog-h">Progressions</h2>
       <p className="sub">
-        Load a template or build your own from the + buttons on the chord chips. The app picks voicings that keep your hand movement small, counting the move from the last chord back to the first.
+        Load a template, type a numeral, or add chords with the + buttons in the Chords section. The app picks voicings that keep your hand movement small, counting the move from the last chord back to the first. Click a chord name to see all its voicings.
       </p>
 
       <h3 style={{ margin: "0 0 6px", fontSize: "0.95rem" }}>Your progression in {ex.key.name}</h3>
       {prog.steps.length === 0 ? (
-        <p className="hint">Empty. Add chords with + in the chord list, type a numeral below, or load a template.</p>
+        <p className="hint">Empty. Load a template, type a numeral below, or add chords with + in the Chords section.</p>
       ) : (
         <ol className="steps">
           {prog.steps.map((s, i) => {
@@ -71,10 +72,10 @@ export function ProgressionPanel({ ex, romans, pins, dispatch, player }: Props) 
               <li key={`${i}:${s.id}`} className="step" aria-current={playing && active === i ? "step" : undefined}>
                 <header>
                   <b>{s.numeral}</b>
-                  <span>
+                  <button className="to-voicings" aria-label={`Voicings for ${s.name}`} onClick={() => onOpenChord(s.chord)}>
                     {s.name}
                     {s.shapeName ? ` (shape ${s.shapeName})` : ""}
-                  </span>
+                  </button>
                 </header>
                 {!s.diatonic && <span className="badge warn">borrowed</span>}
                 {s.voicing ? (

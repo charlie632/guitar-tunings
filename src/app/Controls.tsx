@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type Dispatch, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { asCapo, displayName, keyOf, pc, SCALE_IDS, SCALES, type Exploration } from "../theory";
 import type { AppAction, Settings } from "./settings";
 import { TuningPicker } from "./TuningPicker";
@@ -199,6 +199,16 @@ function Popover({ id, label, wide, onClose, children }: {
   const backdrop = useRef<HTMLDivElement>(null);
   const [modal, setModal] = useState(false);
 
+  // Beside the rail the popover hangs from its pill; lift it when the pill sits too low for it to fit on screen.
+  useLayoutEffect(() => {
+    const dialog = ref.current!;
+    if (getComputedStyle(dialog).position !== "absolute") return;
+    const margin = 16;
+    const top = dialog.offsetParent!.getBoundingClientRect().top;
+    dialog.style.top = `${Math.max(Math.min(0, window.innerHeight - margin - top - dialog.offsetHeight), margin - top)}px`;
+    dialog.style.maxHeight = `${window.innerHeight - 2 * margin}px`;
+  }, []);
+
   useEffect(() => {
     ref.current?.querySelector<HTMLElement>('[aria-checked="true"], select, input, button:not(.sheet-close)')?.focus();
 
@@ -206,7 +216,7 @@ function Popover({ id, label, wide, onClose, children }: {
     if (!backdrop.current || getComputedStyle(backdrop.current).display === "none") return;
     setModal(true);
     const dialog = ref.current!;
-    const outside = Array.from(document.querySelectorAll<HTMLElement>(".shell > *, .toolbar > *")).filter(
+    const outside = Array.from(document.querySelectorAll<HTMLElement>(".shell > *, .rail > *, .toolbar > *")).filter(
       (el) => !el.contains(dialog),
     );
     outside.forEach((el) => (el.inert = true));

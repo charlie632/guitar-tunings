@@ -2,6 +2,7 @@ import {
   asCapo, formatRoman, isScaleId, keyOf, parseRoman, parseTuning, pc, pcOf, shapeKey, soundingKey, TUNINGS, tuningText,
   type Capo, type Chord, type Pc, type RomanChord, type ScaleId, type Tuning,
 } from "../theory";
+import { DEFAULT_SECTION, isSection, type Section } from "./sections";
 
 export type LabelMode = "note" | "degree" | "shape";
 
@@ -16,6 +17,7 @@ export interface Settings {
 
 export interface AppState {
   readonly settings: Settings;
+  readonly section: Section;
   readonly selected: Chord | null;
   readonly pins: Readonly<Record<number, string>>;
 }
@@ -25,6 +27,7 @@ export type AppAction =
   | { readonly type: "setCapo"; readonly capo: Capo; readonly hold: "keepSound" | "keepShapes" }
   | { readonly type: "setKey"; readonly tonic: Pc; readonly scale: ScaleId; readonly frame: "sounding" | "shape" }
   | { readonly type: "setLabels"; readonly labels: LabelMode }
+  | { readonly type: "open"; readonly section: Section; readonly chord?: Chord }
   | { readonly type: "select"; readonly chord: Chord | null }
   | { readonly type: "appendRoman"; readonly roman: RomanChord }
   | { readonly type: "removeStep"; readonly index: number }
@@ -69,6 +72,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case "setLabels":
       return { ...state, settings: { ...settings, labels: action.labels } };
+    case "open":
+      return { ...state, section: action.section, selected: action.chord ?? state.selected };
     case "select":
       return { ...state, selected: action.chord };
     case "appendRoman":
@@ -176,6 +181,15 @@ function parseProgression(text: string): RomanChord[] | null {
   return out;
 }
 
+export function encodeHash(state: AppState): string {
+  return `view=${state.section}&${encodeSettings(state.settings)}`;
+}
+
+export function decodeSection(hash: string): Section {
+  const view = new URLSearchParams(hash.replace(/^#/, "")).get("view");
+  return isSection(view) ? view : DEFAULT_SECTION;
+}
+
 export function initAppState(hash: string): AppState {
-  return { settings: decodeSettings(hash), selected: null, pins: {} };
+  return { settings: decodeSettings(hash), section: decodeSection(hash), selected: null, pins: {} };
 }

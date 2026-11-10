@@ -1,16 +1,24 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { App } from "./App";
 
-beforeEach(() => window.history.replaceState(null, "", "/"));
-afterEach(cleanup);
+beforeEach(() => {
+  window.history.replaceState(null, "", "/");
+  vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+});
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 const panel = (name: RegExp) => within(screen.getByRole("region", { name }));
+const go = (name: string) => fireEvent.click(within(screen.getByRole("navigation", { name: "Sections" })).getByRole("link", { name }));
 
 describe("App on DADF♯Ae in D major", () => {
-  test("every key panel shows content", () => {
+  test("each section shows its panels", () => {
     render(<App />);
+    expect(screen.getByRole("link", { name: "Fretboard" }).getAttribute("aria-current")).toBe("page");
 
     const board = panel(/^Fretboard$/);
     expect(board.getByText(/DADF♯Ae, D major/)).toBeTruthy();
@@ -19,29 +27,85 @@ describe("App on DADF♯Ae in D major", () => {
     const fits = panel(/Best keys for this tuning/);
     expect(fits.getAllByRole("button")[0]!.textContent).toContain("D major");
     expect(fits.getByText("6/6 open strings in key, 5 in the tonic chord, low string is the root")).toBeTruthy();
+    expect(panel(/^Capo$/).getByText("No capo, so the open strings sound as tuned.")).toBeTruthy();
+    expect(screen.queryByRole("region", { name: /Chords in D major/ })).toBeNull();
 
+    go("Chords");
     const chords = panel(/Chords in D major/);
     expect(chords.getByRole("button", { name: "Bm", pressed: false })).toBeTruthy();
     expect(chords.getByText("vi")).toBeTruthy();
+    expect(screen.queryByRole("region", { name: /^Fretboard$/ })).toBeNull();
 
-    const voicings = panel(/Voicings for D/);
-    expect(voicings.getAllByRole("button").length).toBeGreaterThan(3);
+    go("Voicings");
+    expect(panel(/Voicings for D/).getAllByRole("button").length).toBeGreaterThan(3);
 
+    go("Progressions");
     const prog = panel(/^Progressions/);
     expect(prog.getAllByRole("listitem").map((li) => li.querySelector("header")?.textContent)).toEqual([
       "ID", "VA", "viBm", "IVG",
     ]);
     expect(prog.getByRole("button", { name: "Play loop" })).toBeTruthy();
-
-    expect(panel(/^Capo$/).getByText("No capo, so the open strings sound as tuned.")).toBeTruthy();
   });
 
-  test("picking the Dadd9 chip shows the all-open voicing with its badge", () => {
+  test("picking the Dadd9 chip and following the link shows the all-open voicing with its badge", () => {
     render(<App />);
+    go("Chords");
     fireEvent.click(panel(/Chords in D major/).getByRole("button", { name: "Dadd9" }));
+    fireEvent.click(screen.getByRole("link", { name: "Voicings for Dadd9 →" }));
+    expect(screen.getByRole("link", { name: "Voicings" }).getAttribute("aria-current")).toBe("page");
     const voicings = panel(/Voicings for Dadd9/);
     expect(voicings.getAllByText("6 open strings ring").length).toBeGreaterThan(0);
     expect(voicings.getAllByText("0 0 0 0 0 0").length).toBeGreaterThan(0);
+    const switcher = within(screen.getByRole("group", { name: "Chords in D major" }));
+    expect(switcher.getByRole("button", { name: /Dadd9/, pressed: true })).toBeTruthy();
+  });
+
+  test("the voicings section switches chords without leaving it", () => {
+    render(<App />);
+    go("Voicings");
+    fireEvent.click(within(screen.getByRole("group", { name: "Chords in D major" })).getByRole("button", { name: /Bm/ }));
+    expect(panel(/Voicings for Bm/)).toBeTruthy();
+  });
+
+  test("a progression step's chord opens its voicings", () => {
+    render(<App />);
+    go("Progressions");
+    fireEvent.click(panel(/^Progressions/).getByRole("button", { name: "Voicings for Bm" }));
+    expect(screen.getByRole("link", { name: "Voicings" }).getAttribute("aria-current")).toBe("page");
+    expect(panel(/Voicings for Bm/)).toBeTruthy();
+  });
+
+  test("the setup summary collapses when the section changes", () => {
+    render(<App />);
+    const summary = screen.getByRole("button", { name: /DADF♯Ae · D major · capo 0/ });
+    fireEvent.click(summary);
+    expect(summary.getAttribute("aria-expanded")).toBe("true");
+    go("Chords");
+    expect(summary.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  test("a section URL opens that section, and an old URL without one opens the fretboard", () => {
+    window.history.replaceState(null, "", "/#view=progressions&c=2");
+    render(<App />);
+    expect(screen.getByRole("link", { name: "Progressions" }).getAttribute("aria-current")).toBe("page");
+    expect(panel(/^Progressions/).getByRole("button", { name: "Play loop" })).toBeTruthy();
+    cleanup();
+
+    window.history.replaceState(null, "", "/#t=D2.A2.D3.F%233.A3.E4&c=0&k=2&s=major");
+    render(<App />);
+    expect(panel(/^Fretboard$/)).toBeTruthy();
+  });
+
+  test("switching sections keeps the settings and writes the section to the URL", () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "Capo up one fret" }));
+    fireEvent.click(screen.getByRole("button", { name: "Capo up one fret" }));
+    go("Chords");
+    expect(panel(/Chords in D major/).getAllByText("C shape").length).toBeGreaterThan(0);
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    expect(params.get("view")).toBe("chords");
+    expect(params.get("c")).toBe("2");
+    expect(screen.getByRole("link", { name: "Fretboard" }).getAttribute("href")).toContain("c=2");
   });
 
   test("raising the capo with the sound held shows the shape name and the capo sentence", () => {
@@ -49,7 +113,6 @@ describe("App on DADF♯Ae in D major", () => {
     fireEvent.click(screen.getByRole("button", { name: "Capo up one fret" }));
     fireEvent.click(screen.getByRole("button", { name: "Capo up one fret" }));
     expect(panel(/^Capo$/).getByText(/Capo 2 raises every open string 2 semitones/)).toBeTruthy();
-    expect(panel(/Chords in D major/).getAllByText("C shape").length).toBeGreaterThan(0);
   });
 
   test("a bad custom tuning shows an inline error and keeps the old tuning", () => {
@@ -63,6 +126,7 @@ describe("App on DADF♯Ae in D major", () => {
 
   test("a progression loaded from a template replaces the steps", () => {
     render(<App />);
+    go("Progressions");
     fireEvent.click(screen.getByRole("button", { name: "Load Minor shuttle" }));
     const steps = panel(/^Progressions/).getAllByRole("listitem");
     expect(steps).toHaveLength(4);
