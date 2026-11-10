@@ -9,7 +9,6 @@ const PAD_TOP = 26;
 
 interface Props {
   voicing: VoicingView;
-  /** Capo position, so the nut reads as the capo. */
   capo: number;
 }
 

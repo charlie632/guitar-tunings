@@ -3,14 +3,12 @@ import { loopSeconds, scheduleProgression, strum, type Midi, type NoteEvent } fr
 export interface ProgressionPlayback {
   readonly bpm: number;
   readonly beatsPerChord?: number;
-  /** Called as each step starts, in time with the audio. */
   readonly onStep?: (index: number) => void;
 }
 
 export interface Player {
   pluck(m: Midi): void;
   strum(ms: readonly Midi[]): void;
-  /** Loops until stopped. Starting a new one stops the previous. */
   playProgression(steps: readonly (readonly Midi[])[], opts: ProgressionPlayback): void;
   stop(): void;
 }
@@ -19,7 +17,6 @@ const LOOKAHEAD_S = 0.6;
 const TICK_MS = 120;
 const SEGMENT_S = 3;
 
-/** Karplus-Strong: a noise burst through a damped delay line, rendered once per pitch. */
 function renderPluck(ctx: BaseAudioContext, midi: number): AudioBuffer {
   const sr = ctx.sampleRate;
   const freq = 440 * 2 ** ((midi - 69) / 12);

@@ -2,17 +2,13 @@ import { chordTones, QUALITIES, type Chord } from "./chords";
 import type { Fret, Instrument, StringIndex } from "./instrument";
 import { pc, pcOf, type Interval, type Midi, type Pc } from "./pitch";
 
-/** Per string, low to high. `null` is muted. Capo-relative. */
 export type FretPattern = readonly (Fret | null)[];
 
 export interface VoicingLimits {
-  /** Fretted span in frets, as a window of this width. */
   readonly maxSpan: number;
-  /** A barre counts as one finger. */
   readonly maxFingers: number;
   readonly maxInteriorMutes: number;
   readonly minSounding: number;
-  /** Inversions rank below root position, but emo leans on drones and non-root bass. */
   readonly allowInversions: boolean;
 }
 
@@ -24,7 +20,6 @@ export const DEFAULT_LIMITS: VoicingLimits = {
   allowInversions: true,
 };
 
-/** One table, so ranking is tuned in one place. Open strings are the heaviest reward. */
 export const VOICING_WEIGHTS = {
   openString: 3,
   sounding: 1,
@@ -36,12 +31,10 @@ export const VOICING_WEIGHTS = {
 
 export interface VoicingScore {
   readonly total: number;
-  /** Sounding open strings: the tuning's gift. */
   readonly openStrings: number;
   readonly sounding: number;
   readonly fingers: number;
   readonly span: number;
-  /** Lowest fretted fret, counted from the capo. 0 when nothing is fretted. */
   readonly height: number;
   readonly rootInBass: boolean;
 }
@@ -53,7 +46,6 @@ export interface Barre {
 }
 
 export interface Voicing {
-  /** Frets joined, stable across renders: "x,0,2,2,x,0". */
   readonly id: string;
   readonly frets: FretPattern;
   readonly tones: readonly ({ readonly midi: Midi; readonly role: Interval; readonly pc: Pc } | null)[];
@@ -195,7 +187,6 @@ export function generateVoicings(
   return kept;
 }
 
-/** `v` is `k` with extra strings muted: the same shape, played thinner. */
 function thinnerCopy(v: Voicing, k: Voicing): boolean {
   return v.frets.every((f, s) => f === null || f === k.frets[s]);
 }

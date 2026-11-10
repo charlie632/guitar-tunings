@@ -16,7 +16,6 @@ export interface RomanChord {
 const NUMERALS = ["I", "II", "III", "IV", "V", "VI", "VII"];
 const MAJOR_SEMIS = [0, 2, 4, 5, 7, 9, 11];
 
-/** `${upper}|${suffix}` -> quality, built from the QUALITIES registry so the grammar cannot drift. */
 const BY_NUMERAL_FORM = new Map<string, QualityId>();
 for (const id of QUALITY_IDS) {
   const { upper, suffix } = QUALITIES[id].roman;
@@ -70,7 +69,7 @@ export interface ProgressionTemplate {
   readonly id: string;
   readonly name: string;
   readonly tags: readonly ProgressionTag[];
-  /** The scale it lives in. Shown as a hint; every template resolves in any key. */
+  /** The scale it lives in. Every template resolves in any key. */
   readonly home: ScaleId;
   readonly romans: readonly RomanChord[];
   readonly note: string;
@@ -121,7 +120,6 @@ function parseOrThrow(text: string): RomanChord {
   return r.value;
 }
 
-/** Authored as text and parsed through `parseRoman` at load, so a typo throws at startup. */
 export const LIBRARY: readonly ProgressionTemplate[] = TEMPLATE_SOURCE.map((t) => ({
   ...t,
   romans: t.romans.split(" ").map(parseOrThrow),
@@ -130,11 +128,8 @@ export const LIBRARY: readonly ProgressionTemplate[] = TEMPLATE_SOURCE.map((t) =
 export interface VoiceLeadingCost {
   readonly perFretMoved: number;
   readonly muteToggle: number;
-  /** Negative: an open string ringing through both chords is a drone. */
   readonly sharedOpenString: number;
-  /** Multiplies the voicing's own score as a reward at each step. */
   readonly scaleWeight: number;
-  /** Candidates kept per step. */
   readonly width: number;
 }
 
@@ -146,7 +141,6 @@ export const VOICE_LEADING: VoiceLeadingCost = {
   width: 10,
 };
 
-/** Frets the hand moves plus strings that start or stop sounding. Never negative. */
 function movementBetween(a: Voicing, b: Voicing): number {
   let m = 0;
   for (let s = 0; s < a.frets.length; s++) {
@@ -169,18 +163,10 @@ function nodeCost(v: Voicing): number {
 }
 
 export interface VoiceLed {
-  /** One entry per input step. Null where no candidate exists. */
   readonly chosen: readonly (Voicing | null)[];
-  /** Frets moved plus mute toggles along the chosen path, including the last-to-first edge. */
   readonly movement: number;
 }
 
-/**
- * Pick one voicing per step to minimize hand movement while keeping strong shapes.
- * Progressions loop, so the last-to-first edge is part of the cost: the DP runs once
- * per choice of first voicing and keeps the cheapest cycle. Steps with no candidates
- * are skipped in the chain. Pure over candidate lists.
- */
 export function voiceLead(candidates: readonly (readonly Voicing[])[]): VoiceLed {
   const live = candidates
     .map((c, i) => ({ i, c: c.slice(0, VOICE_LEADING.width) }))

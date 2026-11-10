@@ -65,7 +65,6 @@ export interface ScaleDef {
   readonly harmonyFrom: HeptatonicId;
 }
 
-/** Registry order is the key-fit tie-break: major and minor rank before the modes. */
 export const SCALES = Object.fromEntries(
   Object.entries(SCALE_SOURCE).map(([id, s]) => [
     id,
@@ -85,7 +84,6 @@ export function isScaleId(x: string): x is ScaleId {
   return Object.hasOwn(SCALES, x);
 }
 
-/** 1..7 */
 export type Degree = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export interface Key {
@@ -109,9 +107,9 @@ function build(tonic: Note, scale: ScaleDef): Key {
 const keyCache = new Map<string, Key>();
 
 /**
- * The only `Key` constructor. Picks the tonic spelling with the fewest accidentals
- * across the scale, rejecting spellings that need a double accidental. Sharp wins
- * a tie, so pc 6 major is F# and pc 1 minor is C#.
+ * Picks the tonic spelling with the fewest accidentals across the scale,
+ * rejecting spellings that need a double accidental. Sharp wins a tie, so pc 6
+ * major is F# and pc 1 minor is C#.
  */
 export function keyOf(tonic: Pc, scaleId: ScaleId): Key {
   const id = `${tonic}:${scaleId}`;
@@ -139,12 +137,10 @@ export function keyOf(tonic: Pc, scaleId: ScaleId): Key {
   return key;
 }
 
-/** The seven-note key whose chords this key uses: itself, or the parent of a pentatonic. */
 export function harmonyOf(key: Key): Key {
   return key.scale.harmonyFrom === key.scale.id ? key : build(key.tonic, SCALES[key.scale.harmonyFrom]);
 }
 
-/** The scale tone at this pitch class, else the key's preferred spelling. */
 export function spellIn(key: Key, p: Pc): Note {
   return key.notes.find((n) => pcOf(n) === p) ?? spellPc(p, key.prefer);
 }
@@ -154,11 +150,9 @@ const CHROMATIC = ["1", "♭2", "2", "♭3", "3", "4", "♯4", "5", "♭6", "6",
 export interface DegreeInfo {
   readonly label: string;
   readonly inScale: boolean;
-  /** Generic scale degree 1..7, for color. Null outside the scale. */
   readonly degree: Degree | null;
 }
 
-/** In-scale tones read their own interval (Lydian's 4th is "♯4"); others use a fixed table. */
 export function degreeLabel(key: Key, p: Pc): DegreeInfo {
   const i = key.notes.findIndex((n) => pcOf(n) === p);
   if (i >= 0) {

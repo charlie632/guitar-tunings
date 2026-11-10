@@ -5,7 +5,6 @@ import {
 
 export type LabelMode = "note" | "degree" | "shape";
 
-/** Everything persisted in the URL hash. The key is always the sounding key. */
 export interface Settings {
   readonly tuning: Tuning;
   readonly capo: Capo;
@@ -17,15 +16,12 @@ export interface Settings {
 
 export interface AppState {
   readonly settings: Settings;
-  /** The chord whose voicings are shown. Not persisted. */
   readonly selected: Chord | null;
-  /** Step index to voicing id. Not persisted. */
   readonly pins: Readonly<Record<number, string>>;
 }
 
 export type AppAction =
   | { readonly type: "setTuning"; readonly tuning: Tuning }
-  /** "sound" keeps the sounding key and changes the shapes. "shapes" keeps the shapes and moves the sound. */
   | { readonly type: "setCapo"; readonly capo: Capo; readonly hold: "sound" | "shapes" }
   | { readonly type: "setKey"; readonly tonic: Pc; readonly scale: ScaleId; readonly frame: "sounding" | "shape" }
   | { readonly type: "setLabels"; readonly labels: LabelMode }
@@ -110,7 +106,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
   }
 }
 
-/** Voicing ids are capo-relative, so a new key or capo drops pins. The selected chord is tuning-independent. */
 function rekey(state: AppState, settings: Settings): AppState {
   const sameKey = settings.tonic === state.settings.tonic && settings.scale === state.settings.scale;
   return { ...state, settings, pins: {}, selected: sameKey ? state.selected : null };
@@ -144,7 +139,6 @@ export function encodeSettings(s: Settings): string {
 
 const LABEL_MODES: readonly LabelMode[] = ["note", "degree", "shape"];
 
-/** Total: each field falls back to its own default and the rest survive. */
 export function decodeSettings(hash: string): Settings {
   const params = new URLSearchParams(hash.replace(/^#/, ""));
   const d = DEFAULT_SETTINGS;

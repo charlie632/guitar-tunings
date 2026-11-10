@@ -4,7 +4,6 @@ import {
 } from "./pitch";
 import { degreeLabel, harmonyOf, type Degree, type Key } from "./scales";
 
-/** `upper: null` means the numeral's case carries no meaning (sus chords, power chords). */
 interface QualitySource {
   readonly symbol: string;
   readonly formula: string;
@@ -40,18 +39,12 @@ export type QualityId = keyof typeof QUALITY_SOURCE;
 export interface QualityDef {
   readonly id: QualityId;
   readonly symbol: string;
-  /** From the root, root first. */
   readonly intervals: readonly Interval[];
-  /** Tones the voicing generator may drop (the 5th, mostly). */
   readonly optional: readonly Interval[];
   readonly roman: QualitySource["roman"];
   readonly kind: "triad" | "color";
 }
 
-/**
- * Adding a row here makes the quality appear wherever it is diatonic, in the
- * Roman-numeral grammar, and in the voicing generator's required tones.
- */
 export const QUALITIES = Object.fromEntries(
   Object.entries(QUALITY_SOURCE).map(([id, q]) => [
     id,
@@ -68,7 +61,6 @@ export const QUALITIES = Object.fromEntries(
 
 export const QUALITY_IDS = Object.keys(QUALITIES) as QualityId[];
 
-/** A spelled root and a quality. Bass and inversion belong to a voicing. */
 export interface Chord {
   readonly root: Note;
   readonly quality: QualityId;
@@ -88,7 +80,6 @@ export interface ChordTone {
   readonly role: Interval;
 }
 
-/** Spelled tones with the interval each plays in the chord. */
 export function chordTones(c: Chord): readonly ChordTone[] {
   return QUALITIES[c.quality].intervals.map((role) => ({ note: transpose(c.root, role), role }));
 }
@@ -96,7 +87,6 @@ export function chordTones(c: Chord): readonly ChordTone[] {
 export interface DegreeHarmony {
   readonly degree: Degree;
   readonly triad: Chord;
-  /** Every color quality whose tones are all scale tones. */
   readonly colors: readonly Chord[];
 }
 
@@ -131,7 +121,6 @@ export function isDiatonic(c: Chord, key: Key): boolean {
 }
 
 export interface ChordExplanation {
-  /** Neighbouring tones, low to high: "D to F♯: major 3rd". */
   readonly stack: readonly { readonly from: Note; readonly to: Note; readonly interval: string }[];
   readonly tones: readonly {
     readonly note: Note;

@@ -9,9 +9,9 @@ export function asCapo(n: number): Capo {
   return Math.min(12, Math.max(0, Math.round(n))) as Capo;
 }
 
-/** Fret counted from the capo (capo = nut = 0). Voicings and chord diagrams use this. */
+/** Fret counted from the capo (capo = nut = 0). */
 export type Fret = Brand<number, "Fret">;
-/** Fret counted from the real nut. Only the full-neck fretboard uses this. */
+/** Fret counted from the real nut. */
 export type BoardFret = Brand<number, "BoardFret">;
 /** 0 = lowest-pitched string. */
 export type StringIndex = number;
@@ -31,10 +31,9 @@ const LOW_BOUND = 35;
 const HIGH_BOUND = 46;
 
 /**
- * Boundary parser for user text and URL params. Accepts "DADF#Ae", "D A D F# A E"
- * and "D2 A2 D3 F#3 A3 E4". A "b" right after a letter is a flat.
- * Strings without an octave get the lowest pitch above the previous string,
- * and the first one lands between B1 and A#2.
+ * Accepts "DADF#Ae", "D A D F# A E" and "D2 A2 D3 F#3 A3 E4". A "b" right after
+ * a letter is a flat. Strings without an octave get the lowest pitch above the
+ * previous string, and the first one lands between B1 and A#2.
  */
 export function parseTuning(text: string): Result<Tuning, TuningError> {
   const r = parseStrings(text);
@@ -117,7 +116,6 @@ const PRESETS = Object.entries(PRESET_SOURCE).map(([id, p]) => {
   return { id: id as TuningId, name: p.name, strings: r.value };
 });
 
-/** Built through the same parser as typed input, so a preset and a typed tuning are one type. */
 export const TUNINGS = Object.fromEntries(
   PRESETS.map((p) => [p.id, { name: p.name, tuning: { strings: p.strings, label: p.name } as Tuning }]),
 ) as { readonly [K in TuningId]: { readonly name: string; readonly tuning: Tuning } };
@@ -132,7 +130,6 @@ export function tuningText(t: Tuning): string {
 export interface Instrument {
   readonly tuning: Tuning;
   readonly capo: Capo;
-  /** Sounding open pitch of each string with the capo on. */
   readonly open: readonly Midi[];
   readonly maxFret: Fret;
 }
@@ -146,7 +143,6 @@ export function instrument(tuning: Tuning, capo: Capo): Instrument {
   };
 }
 
-/** The only place a capo-relative fret becomes a board fret. */
 export function toBoard(ins: Instrument, f: Fret): BoardFret {
   return (f + ins.capo) as BoardFret;
 }

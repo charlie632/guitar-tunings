@@ -5,7 +5,6 @@ import { degreeLabel, keyOf, SCALE_IDS, type Key, type ScaleId } from "./scales"
 
 export interface RingingChord {
   readonly chord: Chord;
-  /** Open strings that are not tones of the chord: 0 or 1. */
   readonly outside: number;
 }
 
@@ -20,7 +19,6 @@ export interface KeyFit {
   readonly inScale: number;
   readonly inTonicChord: number;
   readonly bassIsTonic: boolean;
-  /** Diatonic chords with at most one open string outside them: why the key fits. */
   readonly ringingChords: readonly RingingChord[];
 }
 
@@ -57,11 +55,6 @@ function accidentals(key: Key): number {
   return key.notes.reduce((a, n) => a + Math.abs(n.alter), 0);
 }
 
-/**
- * Lexicographic so the UI can say why in one sentence: scale tones on open strings,
- * then tonic-chord tones, then bass is the tonic, then registry order (major and
- * minor before the modes), then fewer accidentals.
- */
 export function compareFit(a: KeyFit, b: KeyFit): number {
   return (
     b.inScale - a.inScale ||
@@ -73,7 +66,6 @@ export function compareFit(a: KeyFit, b: KeyFit): number {
   );
 }
 
-/** All 12 tonics for each scale in `scales`, best first. */
 export function rankKeys(ins: Instrument, scales: readonly ScaleId[]): readonly KeyFit[] {
   const fits: KeyFit[] = [];
   for (const scale of scales) for (let t = 0; t < 12; t++) fits.push(keyFit(ins, keyOf(pc(t), scale)));
@@ -82,16 +74,12 @@ export function rankKeys(ins: Instrument, scales: readonly ScaleId[]): readonly 
 
 export interface CapoOption {
   readonly capo: Capo;
-  /** What the hands play. */
   readonly shapeKey: Key;
-  /** The sounding key on the capo'd instrument. */
   readonly fit: KeyFit;
 }
 
-/** Higher capos are rarely useful. One constant. */
 export const CAPO_SEARCH_MAX = 7;
 
-/** "I want to sound in key Y. Where should the capo go?" Ties go to the lower capo. */
 export function capoOptions(tuning: Tuning, sounding: Key): readonly CapoOption[] {
   const options: CapoOption[] = [];
   for (let capo = 0; capo <= CAPO_SEARCH_MAX; capo++) {

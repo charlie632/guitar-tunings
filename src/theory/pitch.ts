@@ -10,9 +10,9 @@ export type Pc = Brand<number, "Pc">;
 /** Sounding pitch as a MIDI number (E2 = 40). */
 export type Midi = Brand<number, "Midi">;
 
-/** C D E F G A B as 0..6. Letter arithmetic is what makes spelling correct. */
+/** C D E F G A B as 0..6. */
 export type Letter = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-/** Sharps minus flats. Almost always -1..1; `keyOf` rejects spellings that need more. */
+/** Sharps minus flats. */
 export type Alter = number;
 
 export interface Note {
@@ -20,7 +20,6 @@ export interface Note {
   readonly alter: Alter;
 }
 
-/** A spelled note in an octave. Tunings keep the user's spelling (C#4 stays C#4). */
 export interface Pitch {
   readonly note: Note;
   readonly octave: number;
@@ -65,7 +64,6 @@ export function sameNote(a: Note, b: Note): boolean {
   return a.letter === b.letter && a.alter === b.alter;
 }
 
-/** "1", "b3", "#4", "9" -> Interval. Throws on a malformed token: only registry literals reach it. */
 export function interval(token: string): Interval {
   const m = /^([b#]*)(\d+)$/.exec(token);
   if (!m) throw new Error(`bad interval token "${token}"`);
@@ -82,10 +80,6 @@ export function parseFormula(text: string): readonly Interval[] {
   return text.trim().split(/\s+/).map(interval);
 }
 
-/**
- * Spell `note` up by `iv`. Every spelled note in the app (scale tones, chord
- * tones, borrowed roots, shape keys) comes from here or from `spellPc`.
- */
 export function transpose(note: Note, iv: Interval): Note {
   const raw = note.letter + iv.steps;
   const letter = (raw % 7) as Letter;
@@ -94,14 +88,12 @@ export function transpose(note: Note, iv: Interval): Note {
   return { letter, alter: note.alter + iv.semis - naturalDistance };
 }
 
-/** The interval from `a` up to `b` within one octave of letters (steps 0..6). */
 export function intervalBetween(a: Note, b: Note): Interval {
   const steps = (b.letter - a.letter + 7) % 7;
   const semis = (((pcOf(b) - pcOf(a)) % 12) + 12) % 12;
   return { steps, semis };
 }
 
-/** Spell a bare pitch class with |alter| <= 1, choosing sharps or flats for black keys. */
 export function spellPc(p: Pc, prefer: Accidental): Note {
   const whiteIdx = NATURAL_PC.indexOf(p as 0);
   if (whiteIdx >= 0) return { letter: whiteIdx as Letter, alter: 0 };
@@ -134,7 +126,6 @@ export function pitchName(p: Pitch): string {
 
 const NOTE_RE = /^([A-Ga-g])([#b♯♭]*)(-?\d+)?$/;
 
-/** Boundary parser for one note token: "F#", "f#", "Bb", "C#4". The octave is optional. */
 export function parseNote(text: string): Result<{ note: Note; octave: number | null }, string> {
   const m = NOTE_RE.exec(text.trim());
   if (!m) return { ok: false, error: text };
@@ -145,13 +136,11 @@ export function parseNote(text: string): Result<{ note: Note; octave: number | n
 
 const ORDINALS = ["unison", "2nd", "3rd", "4th", "5th", "6th", "7th"];
 
-/** Degree label relative to a major scale: "1", "♭3", "♯4", "9". */
 export function intervalLabel(iv: Interval): string {
   const base = MAJOR_SEMIS[iv.steps % 7]! + 12 * Math.floor(iv.steps / 7);
   return accidentals(iv.semis - base, "♯", "♭") + (iv.steps + 1);
 }
 
-/** "major 3rd", "perfect 5th", "minor 7th", "major 9th". */
 export function intervalName(iv: Interval): string {
   const simple = iv.steps % 7;
   const base = MAJOR_SEMIS[simple]! + 12 * Math.floor(iv.steps / 7);

@@ -79,7 +79,7 @@ export interface VoicingView {
   )[];
   readonly name: string;
   readonly shapeName: string | null;
-  /** Sounding pitches, low to high: straight to the player. */
+  /** Sounding pitches, low to high. */
   readonly midis: readonly Midi[];
   readonly score: VoicingScore;
   readonly badges: readonly string[];
