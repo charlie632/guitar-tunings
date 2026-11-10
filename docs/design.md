@@ -16,7 +16,7 @@ A guitarist plays by feel in seven alternate tunings and wants to learn the theo
 - Branded `Pc`, `Midi`, `Fret` (capo-relative) and `BoardFret` (absolute). `toBoard` is the only crossing.
 - Registries as data: `SCALES`, `QUALITIES`, `TUNINGS`, `LIBRARY`. Scales and qualities are degree-formula strings ("1 2 b3 4 5 b6 b7") parsed at load into `Interval`s. Ids are `keyof` the source tables.
 - One bound `Exploration` from `explore({tuning, capo, tonic, scale})`. The UI never threads tuning or capo into a theory function.
-- App state is one reducer persisted to the URL hash. The sounding key is stored. The shape key is derived.
+- App state is one reducer persisted to the URL hash. The sounding key is stored. The shape key is derived. A section change pushes a history entry and every other change replaces the current one, so Back steps through visited sections. `popstate` and `hashchange` dispatch `hydrate`, which reads the hash back into state.
 
 ## Modules
 
@@ -87,4 +87,4 @@ What limits it: about 1 ms per chord inside `generateVoicings`, which materializ
 
 - Audio is typechecked and unit-tested through its pure schedule, but playback was not heard or measured in this pass.
 - Chord diagrams for tunings with more than 6 strings are untested visually.
-- No undo, no rhythm patterns, no forced enharmonic tonic (F♯ versus G♭ is chosen by fewest accidentals, sharp on a tie), no `hashchange` listener.
+- No undo, no rhythm patterns, no forced enharmonic tonic (F♯ versus G♭ is chosen by fewest accidentals, sharp on a tie).
