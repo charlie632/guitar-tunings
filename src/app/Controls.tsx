@@ -21,25 +21,29 @@ export function Controls({ settings, ex, hold, onHold, dispatch }: Props) {
   const holdText = hold === "keepSound" ? "keep sound" : "keep shapes";
   const [open, setOpen] = useState<SetupPopover | null>(null);
   const barRef = useRef<HTMLElement>(null);
-  const pills = useRef<Partial<Record<SetupPopover, HTMLButtonElement | null>>>({});
 
-  const close = (refocus: boolean) => {
-    if (refocus && open) pills.current[open]?.focus();
+  const refocus = useRef<SetupPopover | null>(null);
+
+  const close = (andRefocus: boolean) => {
+    if (andRefocus) refocus.current = open;
     setOpen(null);
   };
+
+  // Runs after the popover's cleanup has lifted `inert`, which would otherwise block the focus.
+  useEffect(() => {
+    if (open || !refocus.current) return;
+    barRef.current?.querySelector<HTMLElement>(`[data-pill="${refocus.current}"]`)?.focus();
+    refocus.current = null;
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      pills.current[open]?.focus();
-      setOpen(null);
+      if (e.key === "Escape") close(true);
     };
     const onPointer = (e: PointerEvent) => {
       if (barRef.current?.contains(e.target as Node)) return;
-      const focusInside = barRef.current?.contains(document.activeElement) ?? false;
-      if (focusInside) pills.current[open]?.focus();
-      setOpen(null);
+      close(barRef.current?.contains(document.activeElement) ?? false);
     };
     document.addEventListener("keydown", onKey);
     document.addEventListener("pointerdown", onPointer);
@@ -47,41 +51,22 @@ export function Controls({ settings, ex, hold, onHold, dispatch }: Props) {
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onPointer);
     };
-  }, [open]);
+  });
 
-  const pill = (id: SetupPopover, label: string, valueText: string, value: ReactNode, body: ReactNode, wide = false) => (
-    <div className="pillwrap">
-      <button
-        ref={(el) => {
-          pills.current[id] = el;
-        }}
-        className="pill"
-        aria-label={`${label} ${valueText}`}
-        aria-haspopup="dialog"
-        aria-expanded={open === id}
-        aria-controls={open === id ? `setup-${id}` : undefined}
-        onClick={() => setOpen(open === id ? null : id)}
-      >
-        <span className="pill-k">{label}</span>
-        <span className="pill-v">{value}</span>
-      </button>
-      {open === id && (
-        <Popover id={`setup-${id}`} label={label} wide={wide} onClose={() => close(true)}>
-          {body}
-        </Popover>
-      )}
-    </div>
-  );
+  const pillProps = (id: SetupPopover) => ({
+    id,
+    open: open === id,
+    onToggle: () => setOpen(open === id ? null : id),
+    onClose: () => close(true),
+  });
 
   return (
     <section className="toolbar" aria-label="Setup" ref={barRef}>
-      {pill("tuning", "Tuning", settings.tuning.label, settings.tuning.label, <TuningPicker tuning={settings.tuning} dispatch={dispatch} />)}
+      <SetupPill {...pillProps("tuning")} label="Tuning" valueText={settings.tuning.label} className="shrink">
+        <TuningPicker tuning={settings.tuning} dispatch={dispatch} />
+      </SetupPill>
 
-      {pill(
-        "key",
-        "Key",
-        tonicName,
-        tonicName,
+      <SetupPill {...pillProps("key")} label="Key" valueText={tonicName}>
         <div className="field">
           <span className="label" id="tonic-label">Key (sounding)</span>
           <div className="tonics" role="radiogroup" aria-labelledby="tonic-label">
@@ -91,24 +76,17 @@ export function Controls({ settings, ex, hold, onHold, dispatch }: Props) {
                 role="radio"
                 aria-checked={t === tonic}
                 className="btn"
-                onClick={() => {
-                  dispatch({ type: "setKey", tonic: pc(t), scale, frame: "sounding" });
-                  close(true);
-                }}
+                onClick={() => dispatch({ type: "setKey", tonic: pc(t), scale, frame: "sounding" })}
               >
                 {displayName(keyOf(pc(t), scale).tonic)}
               </button>
             ))}
           </div>
           <p className="hint">{ex.key.name}: {ex.key.notes.join(" ")}</p>
-        </div>,
-      )}
+        </div>
+      </SetupPill>
 
-      {pill(
-        "scale",
-        "Scale",
-        SCALES[scale].name,
-        SCALES[scale].name,
+      <SetupPill {...pillProps("scale")} label="Scale" valueText={SCALES[scale].name} wide className="shrink">
         <div className="field">
           <span className="label" id="scale-label">Scale</span>
           <div className="scales" role="radiogroup" aria-labelledby="scale-label">
@@ -117,19 +95,15 @@ export function Controls({ settings, ex, hold, onHold, dispatch }: Props) {
                 key={id}
                 role="radio"
                 aria-checked={id === scale}
-                onClick={() => {
-                  dispatch({ type: "setKey", tonic, scale: id, frame: "sounding" });
-                  close(true);
-                }}
+                onClick={() => dispatch({ type: "setKey", tonic, scale: id, frame: "sounding" })}
               >
                 <strong>{SCALES[id].name}</strong>
                 <span>{SCALES[id].feel}</span>
               </button>
             ))}
           </div>
-        </div>,
-        true,
-      )}
+        </div>
+      </SetupPill>
 
       <div className="capo-pill">
         <button
@@ -140,14 +114,17 @@ export function Controls({ settings, ex, hold, onHold, dispatch }: Props) {
         >
           −
         </button>
-        {pill(
-          "capo",
-          "Capo",
-          `${capo}, ${holdText}`,
-          <>
-            <output aria-live="polite">{capo}</output>
-            <small>{holdText}</small>
-          </>,
+        <SetupPill
+          {...pillProps("capo")}
+          label="Capo"
+          valueText={`${capo}, ${holdText}`}
+          value={
+            <>
+              <output aria-live="polite">{capo}</output>
+              <small>{holdText}</small>
+            </>
+          }
+        >
           <div className="field">
             <span className="label">When the capo moves</span>
             <div className="seg" role="radiogroup" aria-label="What stays fixed when the capo moves">
@@ -159,8 +136,8 @@ export function Controls({ settings, ex, hold, onHold, dispatch }: Props) {
                 ? "Keep sound: the key stays put and the shapes you play change."
                 : "Keep shapes: you play the same shapes and the key moves up."}
             </p>
-          </div>,
-        )}
+          </div>
+        </SetupPill>
         <button
           className="step-btn"
           aria-label="Capo up one fret"
@@ -174,6 +151,43 @@ export function Controls({ settings, ex, hold, onHold, dispatch }: Props) {
   );
 }
 
+interface SetupPillProps {
+  id: SetupPopover;
+  label: string;
+  valueText: string;
+  value?: ReactNode;
+  wide?: boolean;
+  className?: string;
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+  children: ReactNode;
+}
+
+function SetupPill({ id, label, valueText, value, wide = false, className, open, onToggle, onClose, children }: SetupPillProps) {
+  return (
+    <div className={className ? `pillwrap ${className}` : "pillwrap"}>
+      <button
+        data-pill={id}
+        className="pill"
+        aria-label={`${label}: ${valueText}. Change ${label.toLowerCase()}`}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls={open ? `setup-${id}` : undefined}
+        onClick={onToggle}
+      >
+        <span className="pill-k">{label}</span>
+        <span className="pill-v">{value ?? valueText}</span>
+      </button>
+      {open && (
+        <Popover id={`setup-${id}`} label={label} wide={wide} onClose={onClose}>
+          {children}
+        </Popover>
+      )}
+    </div>
+  );
+}
+
 function Popover({ id, label, wide, onClose, children }: {
   id: string;
   label: string;
@@ -182,16 +196,32 @@ function Popover({ id, label, wide, onClose, children }: {
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const backdrop = useRef<HTMLDivElement>(null);
+  const [modal, setModal] = useState(false);
 
   useEffect(() => {
-    const first = ref.current?.querySelector<HTMLElement>('[aria-checked="true"], select, input, button:not(.sheet-close)');
-    first?.focus();
+    ref.current?.querySelector<HTMLElement>('[aria-checked="true"], select, input, button:not(.sheet-close)')?.focus();
+
+    // The stylesheet alone decides when a popover becomes a bottom sheet; the backdrop only renders in that mode.
+    if (!backdrop.current || getComputedStyle(backdrop.current).display === "none") return;
+    setModal(true);
+    const dialog = ref.current!;
+    const outside = Array.from(document.querySelectorAll<HTMLElement>(".shell > *, .toolbar > *")).filter(
+      (el) => !el.contains(dialog),
+    );
+    outside.forEach((el) => (el.inert = true));
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      outside.forEach((el) => (el.inert = false));
+      document.body.style.overflow = overflow;
+    };
   }, []);
 
   return (
     <>
-      <div className="sheet-backdrop" onClick={onClose} />
-      <div id={id} ref={ref} className={wide ? "popover wide" : "popover"} role="dialog" aria-label={label}>
+      <div ref={backdrop} className="sheet-backdrop" onClick={onClose} />
+      <div id={id} ref={ref} className={wide ? "popover wide" : "popover"} role="dialog" aria-modal={modal || undefined} aria-label={label}>
         <div className="sheet-head">
           <strong>{label}</strong>
           <button className="btn small sheet-close" onClick={onClose}>Done</button>

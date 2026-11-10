@@ -75,8 +75,8 @@ describe("Setup toolbar", () => {
 
   test("pills show the current setup and open one popover at a time", () => {
     render(<App />);
-    expect(pill(/^Key D$/)).toBeTruthy();
-    expect(pill(/^Scale Major/).getAttribute("aria-haspopup")).toBe("dialog");
+    expect(pill(/^Key: D\./)).toBeTruthy();
+    expect(pill(/^Scale: Major/).getAttribute("aria-haspopup")).toBe("dialog");
     expect(screen.queryByRole("dialog")).toBeNull();
 
     fireEvent.click(pill(/^Key/));
@@ -88,21 +88,25 @@ describe("Setup toolbar", () => {
     expect(pill(/^Key/).getAttribute("aria-expanded")).toBe("false");
   });
 
-  test("picking a scale closes the popover, updates the pill and returns focus", () => {
+  test("the scale popover stays open so scales can be compared one click each", () => {
     render(<App />);
     fireEvent.click(pill(/^Scale/));
     fireEvent.click(screen.getByRole("radio", { name: /^Dorian/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /^Lydian/ }));
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(pill(/^Scale: Lydian\./)).toBeTruthy();
+    fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("dialog")).toBeNull();
-    expect(pill(/^Scale Dorian$/)).toBe(document.activeElement);
+    expect(pill(/^Scale: Lydian\./)).toBe(document.activeElement);
   });
 
   test("Escape and an outside click close the popover", () => {
     render(<App />);
-    fireEvent.click(pill(/^Capo \d/));
+    fireEvent.click(pill(/^Capo: \d/));
     expect(screen.getByRole("radio", { name: "Keep sound", checked: true })).toBe(document.activeElement);
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("dialog")).toBeNull();
-    expect(pill(/^Capo \d/)).toBe(document.activeElement);
+    expect(pill(/^Capo: \d/)).toBe(document.activeElement);
 
     fireEvent.click(pill(/^Tuning/));
     fireEvent.pointerDown(document.body);
