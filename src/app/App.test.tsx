@@ -47,6 +47,22 @@ describe("App on DADF♯Ae in D major", () => {
     expect(prog.getByRole("button", { name: "Play loop" })).toBeTruthy();
   });
 
+  test("best keys show the top 3, the toggle shows all 12, and tapping a key switches to it", () => {
+    render(<App />);
+    const fits = panel(/Best keys for this tuning/);
+    const keyNames = () => fits.getAllByRole("heading", { level: 3 }).map((h) => h.textContent);
+    expect(keyNames()).toEqual(["D major", "A major", "G major"]);
+
+    fireEvent.click(fits.getByRole("button", { name: "Show all 12 keys" }));
+    expect(keyNames()).toHaveLength(12);
+
+    fireEvent.click(fits.getByRole("button", { name: /^F major/ }));
+    expect(panel(/^Fretboard$/).getByText(/DADF♯Ae, F major/)).toBeTruthy();
+
+    fireEvent.click(fits.getByRole("button", { name: "Show top 3" }));
+    expect(keyNames()).toHaveLength(3);
+  });
+
   test("picking the Dadd9 chip and following the link shows the all-open voicing with its badge", () => {
     render(<App />);
     go("Chords");
