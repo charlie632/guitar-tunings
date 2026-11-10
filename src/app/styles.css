@@ -62,7 +62,7 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .seg button, .btn {
   background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; min-height: 36px;
 }
-.seg button[aria-pressed="true"], .seg button[aria-checked="true"], .btn.primary {
+.seg button[aria-pressed="true"], .seg button[aria-checked="true"], .tonics button[aria-checked="true"], .btn.primary {
   background: var(--accent); color: var(--ink); border-color: var(--accent); font-weight: 600;
 }
 .btn:hover:not(.primary), .seg button:hover { border-color: var(--muted); }
