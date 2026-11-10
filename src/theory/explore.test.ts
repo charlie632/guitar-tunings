@@ -24,7 +24,7 @@ describe("keys and capo", () => {
 
   test("the capo sentence names strings before and after and the shape key", () => {
     expect(ex("dadfsae", 4, "major", 2).capoSentence).toBe(
-      "Capo 2 raises every open string 2 semitones: D A D F♯ A E becomes E B E G♯ B F♯, so D major shapes sound as E major.",
+      "Capo 2 raises every open string 2 semitones. D A D F♯ A E becomes E B E G♯ B F♯, so D major shapes sound as E major.",
     );
     expect(ex("dadfsae", 2).capoSentence).toContain("No capo");
   });

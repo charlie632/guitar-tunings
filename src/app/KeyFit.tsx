@@ -12,9 +12,10 @@ export function KeyFit({ ex, dispatch }: { ex: Exploration; dispatch: Dispatch<A
 
   return (
     <section className="panel" aria-labelledby="fit-h">
-      <h2 id="fit-h">Keys that ring</h2>
+      <h2 id="fit-h">Best keys for this tuning</h2>
       <p className="sub">
-        Ranked by how many open strings are scale tones, then tonic chord tones, then whether the low string is the root.
+        Keys ranked by how many of your open strings are in the scale. Each card shows the open strings as scale degrees,
+        dimmed when they fall outside the scale, and the chords you can strum with the open strings ringing. Tap a key to switch to it.
       </p>
       <div className="seg" role="radiogroup" aria-label="Which scales to rank" style={{ marginBottom: 10 }}>
         <button role="radio" aria-checked={scope === "thisScale"} onClick={() => setScope("thisScale")}>This scale</button>

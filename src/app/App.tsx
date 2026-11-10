@@ -29,7 +29,7 @@ export function App() {
     <div className="shell">
       <header className="top">
         <h1>Tuning Explorer</h1>
-        <p>Pick a tuning, a key and a capo. See the scale, the chords that ring, and progressions that fit under your hands.</p>
+        <p>Pick a tuning, a key and a capo to see the scale on the neck, the chords in the key, and progressions voiced for your tuning.</p>
       </header>
 
       <Controls settings={settings} ex={ex} hold={hold} onHold={setHold} dispatch={dispatch} />
@@ -50,7 +50,7 @@ export function App() {
       <VoicingPanel ex={ex} chord={selected} onStrum={(ms) => player.strum(ms)} />
       <ProgressionPanel ex={ex} romans={settings.progression} pins={state.pins} dispatch={dispatch} player={player} />
 
-      <footer>Settings live in the URL, so copy the address to share this view. Sound is synthesized in your browser.</footer>
+      <footer>Settings live in the URL, so copy the address to share this view. Your browser synthesizes the sound.</footer>
     </div>
   );
 }

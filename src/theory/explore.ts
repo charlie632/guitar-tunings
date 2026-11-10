@@ -264,11 +264,11 @@ export function explore(input: ExploreInput): Exploration {
   let boardCache: FretboardView | null = null;
 
   const capoSentence = (() => {
-    if (capo === 0) return "No capo: the open strings sound as tuned.";
+    if (capo === 0) return "No capo, so the open strings sound as tuned.";
     const raised = tuning.strings.map((s) => displayName(spellIn(key, pc(midiOf(s) + capo))));
     const shapeName = shape!.name;
     return (
-      `Capo ${capo} raises every open string ${capo} semitone${capo === 1 ? "" : "s"}: ` +
+      `Capo ${capo} raises every open string ${capo} semitone${capo === 1 ? "" : "s"}. ` +
       `${tuning.strings.map((s) => displayName(s.note)).join(" ")} becomes ${raised.join(" ")}, ` +
       `so ${shapeName} shapes sound as ${key.name}.`
     );

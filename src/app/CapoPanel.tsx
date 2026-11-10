@@ -8,12 +8,12 @@ export function CapoPanel({ ex, settings, dispatch }: { ex: Exploration; setting
 
   return (
     <section className="panel" aria-labelledby="capo-h">
-      <h2 id="capo-h">Capo, both directions</h2>
+      <h2 id="capo-h">Capo</h2>
       <p className="sentence">{ex.capoSentence}</p>
 
       <div className="capo-grid">
         <div className="field" style={{ marginTop: 12 }}>
-          <label className="label" htmlFor="shape-tonic">Shapes to sound: I play shapes in</label>
+          <label className="label" htmlFor="shape-tonic">If I play the shapes of</label>
           <select
             id="shape-tonic"
             value={shapeTonic}
@@ -29,13 +29,13 @@ export function CapoPanel({ ex, settings, dispatch }: { ex: Exploration; setting
           </select>
           <p className="hint">
             {ex.capo === 0
-              ? "Capo is at 0, so shapes and sound are the same. Raise the capo to see them split."
-              : `With the capo at ${ex.capo}, those shapes sound in ${ex.key.name}.`}
+              ? "With no capo, the shapes sound in the key you play. Move the capo to see them split."
+              : `With the capo at ${ex.capo}, they sound in ${ex.key.name}.`}
           </p>
         </div>
 
         <div className="field">
-          <span className="label">Sound to shapes: to sound in {ex.key.name}, try</span>
+          <span className="label">To sound in {ex.key.name}, put the capo at</span>
           {options.map((o) => (
             <button
               key={o.capo}
