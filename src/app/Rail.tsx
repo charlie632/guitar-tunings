@@ -9,7 +9,8 @@ interface Props {
 }
 
 export function Rail({ section, link, summary, children }: Props) {
-  const [setupOpen, setSetupOpen] = useState(false);
+  const [openIn, setOpenIn] = useState<Section | null>(null);
+  const setupOpen = openIn === section;
   return (
     <aside className="rail" data-open={setupOpen}>
       <nav className="sections" aria-label="Sections">
@@ -21,7 +22,7 @@ export function Rail({ section, link, summary, children }: Props) {
           ))}
         </ul>
       </nav>
-      <button className="summary" aria-expanded={setupOpen} aria-controls="setup" onClick={() => setSetupOpen(!setupOpen)}>
+      <button className="summary" aria-expanded={setupOpen} aria-controls="setup" onClick={() => setOpenIn(setupOpen ? null : section)}>
         <span className="summary-v">{summary}</span>
         <span className="summary-k">{setupOpen ? "Done" : "Change"}</span>
       </button>

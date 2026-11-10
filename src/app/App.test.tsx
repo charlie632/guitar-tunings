@@ -75,6 +75,15 @@ describe("App on DADF♯Ae in D major", () => {
     expect(panel(/Voicings for Bm/)).toBeTruthy();
   });
 
+  test("the setup summary collapses when the section changes", () => {
+    render(<App />);
+    const summary = screen.getByRole("button", { name: /DADF♯Ae · D major · capo 0/ });
+    fireEvent.click(summary);
+    expect(summary.getAttribute("aria-expanded")).toBe("true");
+    go("Chords");
+    expect(summary.getAttribute("aria-expanded")).toBe("false");
+  });
+
   test("a section URL opens that section, and an old URL without one opens the fretboard", () => {
     window.history.replaceState(null, "", "/#view=progressions&c=2");
     render(<App />);
