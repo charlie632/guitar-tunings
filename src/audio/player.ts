@@ -80,13 +80,7 @@ export function createPlayer(): Player {
     timer = null;
     stepTimers.forEach(clearTimeout);
     stepTimers.clear();
-    for (const s of live) {
-      try {
-        s.stop();
-      } catch {
-        // already stopped
-      }
-    }
+    for (const s of live) s.stop();
     live.clear();
   };
 
