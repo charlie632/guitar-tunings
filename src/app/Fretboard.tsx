@@ -63,6 +63,7 @@ export function Fretboard({ ex, labels, onLabels, onPluck }: Props) {
         {ex.tuningLabel}, {ex.key.name}
         {ex.capo > 0 ? `, capo ${ex.capo}` : ""}. Click a note to hear it. Arrow keys move between notes.
       </p>
+      <p className="feel">{ex.key.name}: {ex.key.feel}</p>
       <div className="seg" role="radiogroup" aria-label="Fretboard labels" style={{ marginBottom: 8 }}>
         {LABEL_NAMES.map(([id, name]) => (
           <button key={id} role="radio" aria-checked={labels === id} onClick={() => onLabels(id)}>{name}</button>

@@ -54,6 +54,7 @@ describe("App on DADF♯Ae in D major", () => {
 
   test("a bad custom tuning shows an inline error and keeps the old tuning", () => {
     render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: /^Tuning/ }));
     const input = screen.getByLabelText(/Custom, low string first/);
     fireEvent.change(input, { target: { value: "D A H G" } });
     expect(screen.getByRole("alert").textContent).toContain('"H" is not a note');
@@ -66,5 +67,49 @@ describe("App on DADF♯Ae in D major", () => {
     const steps = panel(/^Progressions/).getAllByRole("listitem");
     expect(steps).toHaveLength(4);
     expect(steps[1]!.querySelector("header")!.textContent).toContain("♭VII");
+  });
+});
+
+describe("Setup toolbar", () => {
+  const pill = (name: RegExp) => within(screen.getByRole("region", { name: "Setup" })).getByRole("button", { name });
+
+  test("pills show the current setup and open one popover at a time", () => {
+    render(<App />);
+    expect(pill(/^Key: D\./)).toBeTruthy();
+    expect(pill(/^Scale: Major/).getAttribute("aria-haspopup")).toBe("dialog");
+    expect(screen.queryByRole("dialog")).toBeNull();
+
+    fireEvent.click(pill(/^Key/));
+    expect(pill(/^Key/).getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("radio", { name: "D", checked: true })).toBeTruthy();
+
+    fireEvent.click(pill(/^Scale/));
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(pill(/^Key/).getAttribute("aria-expanded")).toBe("false");
+  });
+
+  test("the scale popover stays open so scales can be compared one click each", () => {
+    render(<App />);
+    fireEvent.click(pill(/^Scale/));
+    fireEvent.click(screen.getByRole("radio", { name: /^Dorian/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /^Lydian/ }));
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(pill(/^Scale: Lydian\./)).toBeTruthy();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(pill(/^Scale: Lydian\./)).toBe(document.activeElement);
+  });
+
+  test("Escape and an outside click close the popover", () => {
+    render(<App />);
+    fireEvent.click(pill(/^Capo: \d/));
+    expect(screen.getByRole("radio", { name: "Keep sound", checked: true })).toBe(document.activeElement);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(pill(/^Capo: \d/)).toBe(document.activeElement);
+
+    fireEvent.click(pill(/^Tuning/));
+    fireEvent.pointerDown(document.body);
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });

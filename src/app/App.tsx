@@ -32,10 +32,7 @@ export function App() {
         <p>Pick a tuning, a key and a capo. See the scale, the chords that ring, and progressions that fit under your hands.</p>
       </header>
 
-      <section className="panel" aria-labelledby="setup-h">
-        <h2 id="setup-h" className="sr">Setup</h2>
-        <Controls settings={settings} ex={ex} hold={hold} onHold={setHold} dispatch={dispatch} />
-      </section>
+      <Controls settings={settings} ex={ex} hold={hold} onHold={setHold} dispatch={dispatch} />
 
       <Fretboard
         ex={ex}
