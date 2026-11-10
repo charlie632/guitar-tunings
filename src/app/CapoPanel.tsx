@@ -3,7 +3,7 @@ import { keyOf, pc, type Exploration } from "../theory";
 import type { AppAction, Settings } from "./settings";
 
 export function CapoPanel({ ex, settings, dispatch }: { ex: Exploration; settings: Settings; dispatch: Dispatch<AppAction> }) {
-  const options = ex.capoOptions().slice(0, 4);
+  const options = ex.capoOptions().slice(0, 3);
   const shapeTonic = ex.shapeKey?.tonic ?? ex.key.tonic;
 
   return (
@@ -12,7 +12,7 @@ export function CapoPanel({ ex, settings, dispatch }: { ex: Exploration; setting
       <p className="sentence">{ex.capoSentence}</p>
 
       <div className="capo-grid">
-        <div className="field" style={{ marginTop: 12 }}>
+        <div className="field">
           <label className="label" htmlFor="shape-tonic">If I play the shapes of</label>
           <select
             id="shape-tonic"
@@ -27,11 +27,7 @@ export function CapoPanel({ ex, settings, dispatch }: { ex: Exploration; setting
               </option>
             ))}
           </select>
-          <p className="hint">
-            {ex.capo === 0
-              ? "With no capo, the shapes sound in the key you play. Move the capo to see them split."
-              : `With the capo at ${ex.capo}, they sound in ${ex.key.name}.`}
-          </p>
+          {ex.capo > 0 && <p className="hint">With the capo at {ex.capo}, they sound in {ex.key.name}.</p>}
         </div>
 
         <div className="field">
@@ -45,8 +41,8 @@ export function CapoPanel({ ex, settings, dispatch }: { ex: Exploration; setting
             >
               <strong>{o.sentence}</strong>
               <span>
-                {o.fit.summary}.
-                {o.easyChords !== null && ` ${o.easyChords} of 7 triads have an easy open shape.`}
+                {o.fit.inScale}/{o.fit.strings.length} open strings in key
+                {o.easyChords !== null && `, ${o.easyChords}/7 easy triads`}
               </span>
             </button>
           ))}
