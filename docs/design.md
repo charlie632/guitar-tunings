@@ -37,7 +37,7 @@ A guitarist plays by feel in seven alternate tunings and wants to learn the theo
 
 Algorithms in brief:
 
-- **Voicings.** For each window of the neck (lowest fretted fret = window start, span 4), every string may be muted, open (if a chord tone) or fretted on a chord tone inside the window. DFS prunes interior mutes. A leaf must sound 3+ strings, contain every non-optional tone and fit 4 fingers (a barre counts once). Ranking is one weighted table where an open ringing string is the biggest reward. The lowest fretted fret equalling the window start removes duplicates across windows.
+- **Voicings.** For each window of the neck (lowest fretted fret = window start, span 4), every string may be muted, open (if a chord tone) or fretted on a chord tone inside the window. DFS prunes interior mutes. A leaf must sound 3+ strings, contain every non-optional tone and fit 4 fingers (a barre counts once). Ranking is one weighted table where an open ringing string is the biggest reward. The lowest fretted fret equalling the window start removes duplicates across windows. After ranking, a shape is dropped when a better-ranked shape with the same bass plays the same frets on more strings, so the list shows distinct shapes rather than one shape with different strings muted.
 - **Key fit.** Lexicographic: open strings in scale, then in the tonic triad, then low string is the tonic, then scale registry order (major and minor before modes), then fewer accidentals. The UI can say why in one sentence. `capoOptions` is `keyFit` mapped over capo 0 to 7, so the two cannot disagree.
 - **Voice leading.** Viterbi over the top 10 candidates per step. Cost is frets moved, mute toggles, a drone bonus for open strings that ring through both chords, and the voicing's own score. Progressions loop, so the DP runs once per choice of first voicing and keeps the cheapest cycle.
 - **Numerals.** `RomanChord {step, quality}` where `step` is the spelled interval above the tonic measured against the major scale. A progression keeps its sound when the tonic changes, and borrowed chords are visible. In a minor key the diatonic chords read i, ♭III, iv, v, ♭VI, ♭VII, which the chord list says out loud.
@@ -85,7 +85,6 @@ What limits it: about 1 ms per chord inside `generateVoicings`, which materializ
 
 ## Known gaps
 
-- The ranked voicing list has near-duplicates that differ only by which string is muted.
 - Audio is typechecked and unit-tested through its pure schedule, but playback was not heard or measured in this pass.
 - Chord diagrams for tunings with more than 6 strings are untested visually.
 - No undo, no rhythm patterns, no forced enharmonic tonic (F♯ versus G♭ is chosen by fewest accidentals, sharp on a tie), no `hashchange` listener.

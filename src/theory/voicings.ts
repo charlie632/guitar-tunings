@@ -183,5 +183,19 @@ export function generateVoicings(
   }
 
   out.sort((a, b) => b.score.total - a.score.total || a.score.height - b.score.height || (a.id < b.id ? -1 : 1));
-  return out;
+  const kept: Voicing[] = [];
+  const byBass = new Map<Pc, Voicing[]>();
+  for (const v of out) {
+    let same = byBass.get(v.bass);
+    if (!same) byBass.set(v.bass, (same = []));
+    if (same.some((k) => thinnerCopy(v, k))) continue;
+    kept.push(v);
+    same.push(v);
+  }
+  return kept;
+}
+
+/** `v` is `k` with extra strings muted: the same shape, played thinner. */
+function thinnerCopy(v: Voicing, k: Voicing): boolean {
+  return v.frets.every((f, s) => f === null || f === k.frets[s]);
 }

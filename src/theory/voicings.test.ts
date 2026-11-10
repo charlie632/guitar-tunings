@@ -90,4 +90,12 @@ describe("generateVoicings", () => {
     const roles = new Set(chordTones(c).map((t) => t.role.semis));
     for (const t of v.tones) if (t) expect(roles.has(t.role.semis)).toBe(true);
   });
+
+  test("a thinner copy of a better shape is dropped, but a new bass note is kept", () => {
+    const ids = generateVoicings(chord("B", "min"), instrument(TUNINGS.dadfsae.tuning, 0)).map((v) => v.id);
+    expect(ids).toContain("0,2,0,0,2,2");
+    expect(ids).not.toContain("0,2,0,0,2,x");
+    expect(ids).not.toContain("0,2,0,0,x,x");
+    expect(ids).toContain("x,2,0,0,2,2");
+  });
 });
