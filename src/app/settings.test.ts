@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { keyOf, parseRoman, parseTuning, pc, TUNINGS, tuningText, type Chord, type RomanChord } from "../theory";
 import {
-  appReducer, DEFAULT_SETTINGS, decodeSettings, encodeSettings, initAppState, type AppAction, type AppState,
+  appReducer, DEFAULT_SETTINGS, decodeSection, decodeSettings, encodeHash, encodeSettings, initAppState, type AppAction, type AppState,
 } from "./settings";
 
 const roman = (t: string): RomanChord => {
@@ -34,6 +34,28 @@ describe("URL codec", () => {
     expect(mixed.scale).toBe("lydian");
     expect(mixed.soundingTonic).toBe(DEFAULT_SETTINGS.soundingTonic);
     expect(mixed.progression).toHaveLength(2);
+  });
+
+  test("the section round-trips through the URL alongside the settings", () => {
+    const state = run(fresh(), { type: "setCapo", capo: 4, hold: "keepSound" }, { type: "open", section: "progressions" });
+    const back = initAppState("#" + encodeHash(state));
+    expect(back.section).toBe("progressions");
+    expect(back.settings.capo).toBe(4);
+  });
+
+  test("a missing or unknown section falls back to the fretboard", () => {
+    expect(decodeSection("")).toBe("fretboard");
+    expect(decodeSection("#c=2&k=2")).toBe("fretboard");
+    for (const view of ["nope", "toString", "__proto__", "constructor", "Chords", ""]) {
+      expect(decodeSection(`#view=${view}&c=1`)).toBe("fretboard");
+    }
+  });
+
+  test("open switches the section and selects the chord in one step; without a chord the selection stays", () => {
+    const chord: Chord = { root: { letter: 5, alter: 0 }, quality: "min" };
+    const opened = run(fresh(), { type: "open", section: "voicings", chord });
+    expect(opened).toMatchObject({ section: "voicings", selected: chord });
+    expect(run(opened, { type: "open", section: "chords" })).toMatchObject({ section: "chords", selected: chord });
   });
 
   test("an empty hash gives the default of DADF♯Ae in D major", () => {

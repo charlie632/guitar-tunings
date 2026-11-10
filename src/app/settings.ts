@@ -185,7 +185,11 @@ export function encodeHash(state: AppState): string {
   return `view=${state.section}&${encodeSettings(state.settings)}`;
 }
 
-export function initAppState(hash: string): AppState {
+export function decodeSection(hash: string): Section {
   const view = new URLSearchParams(hash.replace(/^#/, "")).get("view");
-  return { settings: decodeSettings(hash), section: isSection(view) ? view : DEFAULT_SECTION, selected: null, pins: {} };
+  return isSection(view) ? view : DEFAULT_SECTION;
+}
+
+export function initAppState(hash: string): AppState {
+  return { settings: decodeSettings(hash), section: decodeSection(hash), selected: null, pins: {} };
 }
