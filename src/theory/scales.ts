@@ -139,6 +139,11 @@ export function keyOf(tonic: Pc, scaleId: ScaleId): Key {
   return key;
 }
 
+/** The seven-note key whose chords this key uses: itself, or the parent of a pentatonic. */
+export function harmonyOf(key: Key): Key {
+  return key.scale.harmonyFrom === key.scale.id ? key : build(key.tonic, SCALES[key.scale.harmonyFrom]);
+}
+
 /** The scale tone at this pitch class, else the key's preferred spelling. */
 export function spellIn(key: Key, p: Pc): Note {
   return key.notes.find((n) => pcOf(n) === p) ?? spellPc(p, key.prefer);
