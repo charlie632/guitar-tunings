@@ -27,7 +27,7 @@ export type AppAction =
   | { readonly type: "setCapo"; readonly capo: Capo; readonly hold: "keepSound" | "keepShapes" }
   | { readonly type: "setKey"; readonly tonic: Pc; readonly scale: ScaleId; readonly frame: "sounding" | "shape" }
   | { readonly type: "setLabels"; readonly labels: LabelMode }
-  | { readonly type: "setSection"; readonly section: Section }
+  | { readonly type: "open"; readonly section: Section; readonly chord?: Chord }
   | { readonly type: "select"; readonly chord: Chord | null }
   | { readonly type: "appendRoman"; readonly roman: RomanChord }
   | { readonly type: "removeStep"; readonly index: number }
@@ -72,8 +72,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     }
     case "setLabels":
       return { ...state, settings: { ...settings, labels: action.labels } };
-    case "setSection":
-      return { ...state, section: action.section };
+    case "open":
+      return { ...state, section: action.section, selected: action.chord ?? state.selected };
     case "select":
       return { ...state, selected: action.chord };
     case "appendRoman":

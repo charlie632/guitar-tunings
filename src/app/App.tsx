@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type MouseEvent } from "react";
-import { explore } from "../theory";
+import { explore, type Chord } from "../theory";
 import { CapoPanel } from "./CapoPanel";
 import { ChordGrid } from "./ChordGrid";
 import { ChordSwitcher } from "./ChordSwitcher";
@@ -30,14 +30,18 @@ export function App() {
   const selected = state.selected ?? ex.chords()[0]!.triad.chord;
   const selectedName = ex.card(selected).name;
 
+  const open = (to: Section, moveFocus: boolean, chord?: Chord) => {
+    dispatch({ type: "open", section: to, chord });
+    window.scrollTo({ top: 0 });
+    if (moveFocus) mainRef.current?.focus({ preventScroll: true });
+  };
+
   const sectionLink = (to: Section, moveFocus: boolean) => ({
     href: "#" + encodeHash({ ...state, section: to }),
     onClick: (e: MouseEvent) => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
       e.preventDefault();
-      dispatch({ type: "setSection", section: to });
-      window.scrollTo({ top: 0 });
-      if (moveFocus) mainRef.current?.focus({ preventScroll: true });
+      open(to, moveFocus);
     },
   });
 
@@ -79,7 +83,16 @@ export function App() {
           </>
         );
       case "progressions":
-        return <ProgressionPanel ex={ex} romans={settings.progression} pins={state.pins} dispatch={dispatch} player={player} />;
+        return (
+          <ProgressionPanel
+            ex={ex}
+            romans={settings.progression}
+            pins={state.pins}
+            dispatch={dispatch}
+            player={player}
+            onOpenChord={(chord) => open("voicings", true, chord)}
+          />
+        );
     }
   };
 

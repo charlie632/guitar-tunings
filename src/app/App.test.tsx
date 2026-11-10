@@ -62,6 +62,14 @@ describe("App on DADF♯Ae in D major", () => {
     expect(panel(/Voicings for Bm/)).toBeTruthy();
   });
 
+  test("a progression step's chord opens its voicings", () => {
+    render(<App />);
+    go("Progressions");
+    fireEvent.click(panel(/^Progressions/).getByRole("button", { name: "Voicings for Bm" }));
+    expect(screen.getByRole("link", { name: "Voicings" }).getAttribute("aria-current")).toBe("page");
+    expect(panel(/Voicings for Bm/)).toBeTruthy();
+  });
+
   test("a section URL opens that section, and an old URL without one opens the fretboard", () => {
     window.history.replaceState(null, "", "/#view=progressions&c=2");
     render(<App />);

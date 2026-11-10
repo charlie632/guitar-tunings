@@ -356,7 +356,11 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .step[aria-current="step"] { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(255 180 84 / 0.18); }
 .step header { display: flex; justify-content: space-between; align-items: baseline; width: 100%; gap: 6px; }
 .step header b { font-size: 1.05rem; }
-.step header span { color: var(--muted); font-size: 0.8rem; }
+.to-voicings {
+  background: none; border: 0; padding: 4px 0; min-width: 0; text-align: right; color: var(--accent); font-size: 0.8rem; font-weight: 600;
+  text-decoration: underline; text-underline-offset: 2px; text-decoration-color: rgb(255 180 84 / 0.4);
+}
+.to-voicings::after { content: " →"; }
 .step .row { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; align-items: center; }
 .step .nov { color: var(--bad); font-size: 0.85rem; padding: 20px 0; }
 
