@@ -9,7 +9,7 @@ import { KeyFit } from "./KeyFit";
 import { ProgressionPanel } from "./ProgressionPanel";
 import { Rail } from "./Rail";
 import { SECTION_LABELS, type Section } from "./sections";
-import { appReducer, encodeHash, initAppState } from "./settings";
+import { appReducer, decodeSection, encodeHash, initAppState } from "./settings";
 import { usePlayer } from "./usePlayer";
 import { VoicingPanel } from "./VoicingPanel";
 
@@ -24,15 +24,33 @@ export function App() {
   const player = usePlayer();
 
   useEffect(() => {
-    window.history.replaceState(null, "", "#" + encodeHash(state));
+    const hash = "#" + encodeHash(state);
+    if (hash === window.location.hash) return;
+    const leavingSection = decodeSection(window.location.hash) !== state.section;
+    window.history[leavingSection ? "pushState" : "replaceState"](null, "", hash);
   }, [state]);
+
+  useEffect(() => {
+    // The browser would otherwise restore the old scroll offset after our scroll-to-top on Back.
+    window.history.scrollRestoration = "manual";
+    const hydrate = () => dispatch({ type: "hydrate", hash: window.location.hash });
+    window.addEventListener("popstate", hydrate);
+    window.addEventListener("hashchange", hydrate);
+    return () => {
+      window.removeEventListener("popstate", hydrate);
+      window.removeEventListener("hashchange", hydrate);
+    };
+  }, []);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [section]);
 
   const selected = state.selected ?? ex.chords()[0]!.triad.chord;
   const selectedName = ex.card(selected).name;
 
   const open = (to: Section, moveFocus: boolean, chord?: Chord) => {
     dispatch({ type: "open", section: to, chord });
-    window.scrollTo({ top: 0 });
     if (moveFocus) mainRef.current?.focus({ preventScroll: true });
   };
 

@@ -33,7 +33,8 @@ export type AppAction =
   | { readonly type: "removeStep"; readonly index: number }
   | { readonly type: "moveStep"; readonly from: number; readonly to: number }
   | { readonly type: "setProgression"; readonly romans: readonly RomanChord[] }
-  | { readonly type: "pin"; readonly index: number; readonly id: string | null };
+  | { readonly type: "pin"; readonly index: number; readonly id: string | null }
+  | { readonly type: "hydrate"; readonly hash: string };
 
 function roman(text: string): RomanChord {
   const r = parseRoman(text);
@@ -107,6 +108,12 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       if (action.id === null) delete pins[action.index];
       else pins[action.index] = action.id;
       return { ...state, pins };
+    }
+    case "hydrate": {
+      const section = decodeSection(action.hash);
+      const next = section === state.section ? state : { ...state, section };
+      const decoded = decodeSettings(action.hash);
+      return encodeSettings(decoded) === encodeSettings(settings) ? next : rekeyClearingPicks(next, decoded);
     }
   }
 }

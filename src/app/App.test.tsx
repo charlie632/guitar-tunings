@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { App } from "./App";
 
 beforeEach(() => {
-  window.history.replaceState(null, "", "/");
+  window.history.pushState(null, "", "/");
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
 });
 afterEach(() => {
@@ -13,6 +13,13 @@ afterEach(() => {
 });
 
 const panel = (name: RegExp) => within(screen.getByRole("region", { name }));
+const traverse = (step: () => void) =>
+  new Promise<void>((resolve) => {
+    window.addEventListener("popstate", () => resolve(), { once: true });
+    step();
+  });
+const back = () => traverse(() => window.history.back());
+const forward = () => traverse(() => window.history.forward());
 const go = (name: string) => fireEvent.click(within(screen.getByRole("navigation", { name: "Sections" })).getByRole("link", { name }));
 
 describe("App on DADF♯Ae in D major", () => {
@@ -122,6 +129,41 @@ describe("App on DADF♯Ae in D major", () => {
     expect(params.get("view")).toBe("chords");
     expect(params.get("c")).toBe("2");
     expect(screen.getByRole("link", { name: "Fretboard" }).getAttribute("href")).toContain("c=2");
+  });
+
+  test("Back and Forward step through the visited sections", async () => {
+    render(<App />);
+    go("Chords");
+    go("Voicings");
+    expect(panel(/Voicings for D/)).toBeTruthy();
+
+    await act(() => back());
+    expect(panel(/Chords in D major/)).toBeTruthy();
+    await act(() => back());
+    expect(panel(/^Fretboard$/)).toBeTruthy();
+    await act(() => forward());
+    expect(panel(/Chords in D major/)).toBeTruthy();
+  });
+
+  test("changing the capo replaces the history entry instead of adding one", async () => {
+    render(<App />);
+    const before = window.history.length;
+    go("Chords");
+    fireEvent.click(screen.getByRole("button", { name: "Capo up one fret" }));
+    expect(new URLSearchParams(window.location.hash.slice(1)).get("c")).toBe("1");
+    expect(window.history.length).toBe(before + 1);
+
+    await act(() => back());
+    expect(panel(/^Fretboard$/)).toBeTruthy();
+  });
+
+  test("editing the hash by hand opens that section", () => {
+    render(<App />);
+    act(() => {
+      window.location.hash = "#view=progressions";
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+    expect(panel(/^Progressions/).getByRole("button", { name: "Play loop" })).toBeTruthy();
   });
 
   test("raising the capo with the sound held shows the shape name and the capo sentence", () => {
