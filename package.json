@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "bench": "tsx scripts/bench.ts"
+    "bench": "tsx scripts/bench.ts",
+    "preview": "pnpm build && wrangler dev",
+    "deploy": "pnpm build && wrangler deploy"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -31,6 +33,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.7",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "wrangler": "^4.159.0"
   }
 }

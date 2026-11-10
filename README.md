@@ -27,6 +27,16 @@ pnpm build
 pnpm bench        # times explore() plus voicings for every preset at capo 0 and 2
 ```
 
+## Deploy
+
+The app is static, so it ships as a Cloudflare Worker that serves `dist/` (see `wrangler.jsonc`). It needs no API keys or secrets.
+
+```sh
+pnpm exec wrangler login   # once, opens the browser
+pnpm preview               # build, then serve locally with wrangler
+pnpm run deploy            # build, then deploy (plain `pnpm deploy` is a pnpm builtin)
+```
+
 ## Layout
 
 `src/theory` is pure TypeScript with no React or DOM. `src/audio` renders the theory core's playback schedule with Web Audio. `src/app` is the React UI and the reducer. Read `docs/design.md` before changing any of them.
