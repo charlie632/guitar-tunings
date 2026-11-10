@@ -83,9 +83,9 @@ button { cursor: pointer; }
 .sections ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
 .sections a {
   display: block; padding: 9px 12px; border-radius: 8px; color: var(--muted); text-decoration: none; font-weight: 600;
-  border-left: 3px solid transparent; transition: background-color 150ms ease, color 150ms ease;
+  transition: background-color 150ms ease, color 150ms ease;
 }
-.sections a[aria-current="page"] { color: var(--text); background: var(--panel); border-left-color: var(--accent); }
+.sections a[aria-current="page"] { color: var(--text); background: var(--panel); }
 @media (hover: hover) and (pointer: fine) { .sections a:hover:not([aria-current]) { color: var(--text); background: var(--panel-2); } }
 
 .rail .toolbar { position: static; margin: 0; padding: 0; border: 0; flex-direction: column; gap: 6px; }
@@ -112,7 +112,8 @@ button { cursor: pointer; }
 .switcher { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
 .switcher .chip {
   display: grid; line-height: 1.2; text-align: left; padding: 3px 10px; border-radius: 8px;
-  background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--deg-color, var(--muted)); font-weight: 600;
+  --tint: var(--deg-color, var(--muted));
+  background: color-mix(in srgb, var(--tint) 14%, var(--panel)); border: 1px solid color-mix(in srgb, var(--tint) 40%, var(--line)); font-weight: 600;
   transition: transform 160ms var(--ease-out), background-color 150ms ease, color 150ms ease;
 }
 .switcher .chip small { color: var(--muted); font-weight: 400; font-size: 0.72rem; }
@@ -143,9 +144,9 @@ button { cursor: pointer; }
   .sections { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--panel); border-top: 1px solid var(--line); padding: 0 4px env(safe-area-inset-bottom); }
   .sections ul { grid-template-columns: repeat(4, minmax(max-content, 1fr)); gap: 0; }
   .sections a {
-    border-left: 0; border-top: 3px solid transparent; border-radius: 0; padding: 14px 8px 15px; text-align: center; font-size: 0.82rem;
+    border-radius: 0; padding: 14px 8px 15px; text-align: center; font-size: 0.82rem;
   }
-  .sections a[aria-current="page"] { background: transparent; border-top-color: var(--accent); color: var(--accent); }
+  .sections a[aria-current="page"] { background: transparent; color: var(--accent); }
   .selbar { bottom: 72px; }
   .selbar.top { flex-direction: column; align-items: stretch; }
 }
@@ -311,23 +312,26 @@ input[aria-invalid="true"] { border-color: var(--bad); }
 .capo-opt[aria-current="true"] { border-color: var(--accent); }
 .capo-opt strong { font-size: 0.98rem; }
 .capo-opt span { color: var(--muted); font-size: 0.86rem; }
-.sentence { background: var(--panel-2); border-left: 3px solid var(--accent); padding: 8px 12px; border-radius: 6px; margin: 0; }
+.sentence { background: var(--panel-2); padding: 8px 12px; border-radius: 6px; margin: 0; }
 
 .chordrows { display: grid; gap: 8px; }
 .chordrow { display: grid; grid-template-columns: 54px 1fr; gap: 8px; align-items: start; }
-.numeral { font-weight: 700; font-size: 1.05rem; padding-top: 5px; }
+.numeral { font-weight: 700; font-size: 1.05rem; padding-top: 5px; color: var(--deg-color, var(--text)); }
 .numeral small { display: block; color: var(--muted); font-weight: 400; font-size: 0.72rem; }
 .chordset { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
-.chord { display: inline-flex; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--panel-2); }
+.chord {
+  --tint: var(--deg-color, var(--muted));
+  display: inline-flex; border-radius: 8px; overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--tint) 40%, var(--line)); background: color-mix(in srgb, var(--tint) 14%, var(--panel-2));
+}
 .chord .chip {
   background: transparent; border: 0; padding: 4px 10px; display: grid; text-align: left; line-height: 1.2;
-  border-left: 4px solid var(--deg-color, var(--muted));
 }
 .chord .chip small { color: var(--muted); font-size: 0.72rem; }
 .chord .chip[aria-pressed="true"] { background: var(--accent); color: var(--ink); }
 .chord .chip[aria-pressed="true"] small { color: var(--ink); }
 .chord.color .chip { padding: 2px 8px; font-size: 0.9rem; }
-.chord .add { border: 0; border-left: 1px solid var(--line); background: transparent; width: 28px; font-weight: 700; color: var(--muted); }
+.chord .add { border: 0; border-left: 1px solid color-mix(in srgb, var(--tint) 40%, var(--line)); background: transparent; width: 28px; font-weight: 700; color: var(--muted); }
 .chord.borrowed { border-style: dashed; }
 
 .why { background: var(--panel-2); border-radius: 8px; padding: 10px 12px; margin: 0 0 12px; display: grid; gap: 6px; }
