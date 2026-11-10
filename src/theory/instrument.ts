@@ -130,7 +130,7 @@ export function tuningText(t: Tuning): string {
 export interface Instrument {
   readonly tuning: Tuning;
   readonly capo: Capo;
-  readonly open: readonly Midi[];
+  readonly soundingOpen: readonly Midi[];
   readonly maxFret: Fret;
 }
 
@@ -138,7 +138,7 @@ export function instrument(tuning: Tuning, capo: Capo): Instrument {
   return {
     tuning,
     capo,
-    open: tuning.strings.map((s) => (midiOf(s) + capo) as Midi),
+    soundingOpen: tuning.strings.map((s) => (midiOf(s) + capo) as Midi),
     maxFret: (BOARD_FRETS - capo) as Fret,
   };
 }
@@ -148,7 +148,7 @@ export function toBoard(ins: Instrument, f: Fret): BoardFret {
 }
 
 export function soundingAt(ins: Instrument, s: StringIndex, f: Fret): Midi {
-  return (ins.open[s]! + f) as Midi;
+  return (ins.soundingOpen[s]! + f) as Midi;
 }
 
 /** What the hands play for a key that sounds as `sounding` under the capo. */

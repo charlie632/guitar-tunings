@@ -111,7 +111,7 @@ export interface KeyFitView {
   readonly inScale: number;
   readonly inTonicChord: number;
   readonly bassIsTonic: boolean;
-  readonly ringing: readonly { readonly name: string; readonly outside: number }[];
+  readonly ringing: readonly { readonly name: string; readonly openStringsOutside: number }[];
   readonly summary: string;
 }
 
@@ -252,7 +252,7 @@ export function explore(input: ExploreInput): Exploration {
       inScale: fit.inScale,
       inTonicChord: fit.inTonicChord,
       bassIsTonic: fit.bassIsTonic,
-      ringing: fit.ringingChords.map((r) => ({ name: chordName(r.chord), outside: r.outside })),
+      ringing: fit.ringingChords.map((r) => ({ name: chordName(r.chord), openStringsOutside: r.openStringsOutside })),
       summary:
         `${fit.inScale}/${n} open strings in key, ${fit.inTonicChord} in the tonic chord, ` +
         (fit.bassIsTonic ? "low string is the root" : `low string is the ${low}`),
@@ -370,7 +370,7 @@ export function explore(input: ExploreInput): Exploration {
       const led = voiceLead(all.map((list, i) => (pinned[i] ? [pinned[i]!] : list)));
       const steps = chords.map((chord, i): ProgressionStepView => {
         const chosen = led.chosen[i] ?? null;
-        const alts = all[i]!.slice(0, VOICE_LEADING.width);
+        const alts = all[i]!.slice(0, VOICE_LEADING.candidatesPerStep);
         const withPin = pinned[i] && !alts.includes(pinned[i]!) ? [pinned[i]!, ...alts] : alts;
         return {
           ...card(chord),

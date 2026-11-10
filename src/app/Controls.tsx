@@ -3,7 +3,7 @@ import { asCapo, displayName, keyOf, pc, SCALE_IDS, SCALES, type Exploration } f
 import type { AppAction, Settings } from "./settings";
 import { TuningPicker } from "./TuningPicker";
 
-export type CapoHold = "sound" | "shapes";
+export type CapoHold = "keepSound" | "keepShapes";
 
 interface Props {
   settings: Settings;
@@ -14,7 +14,7 @@ interface Props {
 }
 
 export function Controls({ settings, ex, hold, onHold, dispatch }: Props) {
-  const { capo, tonic, scale } = settings;
+  const { capo, soundingTonic: tonic, scale } = settings;
   return (
     <div className="controls">
       <TuningPicker tuning={settings.tuning} dispatch={dispatch} />
@@ -79,11 +79,11 @@ export function Controls({ settings, ex, hold, onHold, dispatch }: Props) {
           </button>
         </div>
         <div className="seg" role="radiogroup" aria-label="What stays fixed when the capo moves">
-          <button role="radio" aria-checked={hold === "sound"} onClick={() => onHold("sound")}>Keep sound</button>
-          <button role="radio" aria-checked={hold === "shapes"} onClick={() => onHold("shapes")}>Keep shapes</button>
+          <button role="radio" aria-checked={hold === "keepSound"} onClick={() => onHold("keepSound")}>Keep sound</button>
+          <button role="radio" aria-checked={hold === "keepShapes"} onClick={() => onHold("keepShapes")}>Keep shapes</button>
         </div>
         <p className="hint">
-          {hold === "sound"
+          {hold === "keepSound"
             ? "Keep sound: the key stays put and the shapes you play change."
             : "Keep shapes: you play the same shapes and the key moves up."}
         </p>

@@ -9,7 +9,7 @@ export interface ProgressionPlayback {
 export interface Player {
   pluck(m: Midi): void;
   strum(ms: readonly Midi[]): void;
-  playProgression(steps: readonly (readonly Midi[])[], opts: ProgressionPlayback): void;
+  loopProgression(steps: readonly (readonly Midi[])[], opts: ProgressionPlayback): void;
   stop(): void;
 }
 
@@ -17,7 +17,7 @@ const LOOKAHEAD_S = 0.6;
 const TICK_MS = 120;
 const SEGMENT_S = 3;
 
-function renderPluck(ctx: BaseAudioContext, midi: number): AudioBuffer {
+function renderKarplusStrongPluck(ctx: BaseAudioContext, midi: number): AudioBuffer {
   const sr = ctx.sampleRate;
   const freq = 440 * 2 ** ((midi - 69) / 12);
   const period = Math.max(2, Math.round(sr / freq));
@@ -55,7 +55,7 @@ export function createPlayer(): Player {
     for (const e of events) {
       let buffer = buffers.get(e.midi);
       if (!buffer) {
-        buffer = renderPluck(c, e.midi);
+        buffer = renderKarplusStrongPluck(c, e.midi);
         buffers.set(e.midi, buffer);
       }
       const src = c.createBufferSource();
@@ -90,7 +90,7 @@ export function createPlayer(): Player {
       const c = context();
       schedule(strum(ms), c.currentTime + 0.01);
     },
-    playProgression(steps, opts) {
+    loopProgression(steps, opts) {
       stop();
       if (steps.length === 0) return;
       const c = context();

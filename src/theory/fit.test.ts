@@ -48,8 +48,8 @@ describe("keyFit", () => {
     const fit = keyFit(ins("dadfsae"), keyOf(pc(2), "major"));
     const names = fit.ringingChords.map((r) => chordName(r.chord));
     expect(names).toContain("Dadd9");
-    expect(fit.ringingChords[0]!.outside).toBe(0);
-    for (const r of fit.ringingChords) expect(r.outside).toBeLessThanOrEqual(1);
+    expect(fit.ringingChords[0]!.openStringsOutside).toBe(0);
+    for (const r of fit.ringingChords) expect(r.openStringsOutside).toBeLessThanOrEqual(1);
   });
 });
 

@@ -18,8 +18,8 @@ const MAJOR_SEMIS = [0, 2, 4, 5, 7, 9, 11];
 
 const BY_NUMERAL_FORM = new Map<string, QualityId>();
 for (const id of QUALITY_IDS) {
-  const { upper, suffix } = QUALITIES[id].roman;
-  for (const u of upper === null ? [true, false] : [upper]) BY_NUMERAL_FORM.set(`${u}|${suffix}`, id);
+  const { numeralCase, suffix } = QUALITIES[id].roman;
+  for (const u of numeralCase === "either" ? [true, false] : [numeralCase === "upper"]) BY_NUMERAL_FORM.set(`${u}|${suffix}`, id);
 }
 
 const ROMAN_RE = /^([#b]?)(VII|VI|IV|V|III|II|I|vii|vi|iv|v|iii|ii|i)(.*)$/;
@@ -38,10 +38,10 @@ export function parseRoman(text: string): Result<RomanChord, string> {
 function format(r: RomanChord, sharp: string, flat: string): string {
   const steps = r.step.steps % 7;
   const alter = r.step.semis - MAJOR_SEMIS[steps]!;
-  const { upper, suffix } = QUALITIES[r.quality].roman;
+  const { numeralCase, suffix } = QUALITIES[r.quality].roman;
   const numeral = NUMERALS[steps]!;
   const accidental = alter >= 0 ? sharp.repeat(alter) : flat.repeat(-alter);
-  return accidental + ((upper ?? true) ? numeral : numeral.toLowerCase()) + suffix;
+  return accidental + (numeralCase === "lower" ? numeral.toLowerCase() : numeral) + suffix;
 }
 
 /** ASCII accidentals for the URL: "bVII", "IVmaj7". */
@@ -129,16 +129,16 @@ export interface VoiceLeadingCost {
   readonly perFretMoved: number;
   readonly muteToggle: number;
   readonly sharedOpenString: number;
-  readonly scaleWeight: number;
-  readonly width: number;
+  readonly shapeScoreWeight: number;
+  readonly candidatesPerStep: number;
 }
 
 export const VOICE_LEADING: VoiceLeadingCost = {
   perFretMoved: 1,
   muteToggle: 0.5,
   sharedOpenString: -1,
-  scaleWeight: 0.3,
-  width: 10,
+  shapeScoreWeight: 0.3,
+  candidatesPerStep: 10,
 };
 
 function movementBetween(a: Voicing, b: Voicing): number {
@@ -159,7 +159,7 @@ function edgeCost(a: Voicing, b: Voicing): number {
 }
 
 function nodeCost(v: Voicing): number {
-  return -VOICE_LEADING.scaleWeight * v.score.total;
+  return -VOICE_LEADING.shapeScoreWeight * v.score.total;
 }
 
 export interface VoiceLed {
@@ -169,7 +169,7 @@ export interface VoiceLed {
 
 export function voiceLead(candidates: readonly (readonly Voicing[])[]): VoiceLed {
   const live = candidates
-    .map((c, i) => ({ i, c: c.slice(0, VOICE_LEADING.width) }))
+    .map((c, i) => ({ i, c: c.slice(0, VOICE_LEADING.candidatesPerStep) }))
     .filter((x) => x.c.length > 0);
   const chosen: (Voicing | null)[] = candidates.map(() => null);
   if (live.length === 0) return { chosen, movement: 0 };

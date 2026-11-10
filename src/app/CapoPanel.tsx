@@ -41,7 +41,7 @@ export function CapoPanel({ ex, settings, dispatch }: { ex: Exploration; setting
               key={o.capo}
               className="capo-opt"
               aria-current={o.capo === ex.capo}
-              onClick={() => dispatch({ type: "setCapo", capo: o.capo, hold: "sound" })}
+              onClick={() => dispatch({ type: "setCapo", capo: o.capo, hold: "keepSound" })}
             >
               <strong>{o.sentence}</strong>
               <span>

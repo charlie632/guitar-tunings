@@ -5,7 +5,7 @@ import { degreeLabel, keyOf, SCALE_IDS, type Key, type ScaleId } from "./scales"
 
 export interface RingingChord {
   readonly chord: Chord;
-  readonly outside: number;
+  readonly openStringsOutside: number;
 }
 
 export interface KeyFit {
@@ -25,8 +25,8 @@ export interface KeyFit {
 export function keyFit(ins: Instrument, key: Key): KeyFit {
   const rows = diatonicChords(key);
   const tonicPcs = new Set(chordTones(rows[0]!.triad).map((t) => pcOf(t.note)));
-  const openPcs = ins.open.map(pcOfMidi);
-  const strings = ins.open.map((midi, s) => {
+  const openPcs = ins.soundingOpen.map(pcOfMidi);
+  const strings = ins.soundingOpen.map((midi, s) => {
     const d = degreeLabel(key, openPcs[s]!);
     return { midi, degree: d.label, inScale: d.inScale, inTonicChord: tonicPcs.has(openPcs[s]!) };
   });
@@ -36,10 +36,10 @@ export function keyFit(ins: Instrument, key: Key): KeyFit {
     for (const chord of [row.triad, ...row.colors]) {
       const pcs = new Set(chordTones(chord).map((t) => pcOf(t.note)));
       const outside = openPcs.filter((p) => !pcs.has(p)).length;
-      if (outside <= 1) ringingChords.push({ chord, outside });
+      if (outside <= 1) ringingChords.push({ chord, openStringsOutside: outside });
     }
   }
-  ringingChords.sort((a, b) => a.outside - b.outside);
+  ringingChords.sort((a, b) => a.openStringsOutside - b.openStringsOutside);
 
   return {
     key,

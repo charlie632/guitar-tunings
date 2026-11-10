@@ -58,7 +58,7 @@ describe("capo frames", () => {
 
   test("capo raises open strings and shortens the neck", () => {
     const ins = instrument(tuning, 2);
-    expect(ins.open[0]).toBe(38 + 2);
+    expect(ins.soundingOpen[0]).toBe(38 + 2);
     expect(ins.maxFret).toBe(13);
   });
 

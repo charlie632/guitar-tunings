@@ -27,7 +27,7 @@ export function ProgressionPanel({ ex, romans, pins, dispatch, player }: Props) 
 
   useEffect(() => {
     if (!playing) return;
-    player.playProgression(prog.steps.map((s) => s.voicing?.midis ?? []), { bpm, onStep: setActive });
+    player.loopProgression(prog.steps.map((s) => s.voicing?.midis ?? []), { bpm, onStep: setActive });
     return () => {
       player.stop();
       setActive(null);

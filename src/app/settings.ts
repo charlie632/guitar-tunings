@@ -8,7 +8,7 @@ export type LabelMode = "note" | "degree" | "shape";
 export interface Settings {
   readonly tuning: Tuning;
   readonly capo: Capo;
-  readonly tonic: Pc;
+  readonly soundingTonic: Pc;
   readonly scale: ScaleId;
   readonly labels: LabelMode;
   readonly progression: readonly RomanChord[];
@@ -22,7 +22,7 @@ export interface AppState {
 
 export type AppAction =
   | { readonly type: "setTuning"; readonly tuning: Tuning }
-  | { readonly type: "setCapo"; readonly capo: Capo; readonly hold: "sound" | "shapes" }
+  | { readonly type: "setCapo"; readonly capo: Capo; readonly hold: "keepSound" | "keepShapes" }
   | { readonly type: "setKey"; readonly tonic: Pc; readonly scale: ScaleId; readonly frame: "sounding" | "shape" }
   | { readonly type: "setLabels"; readonly labels: LabelMode }
   | { readonly type: "select"; readonly chord: Chord | null }
@@ -41,7 +41,7 @@ function roman(text: string): RomanChord {
 export const DEFAULT_SETTINGS: Settings = {
   tuning: TUNINGS.dadfsae.tuning,
   capo: 0,
-  tonic: pc(2),
+  soundingTonic: pc(2),
   scale: "major",
   labels: "note",
   progression: ["I", "V", "vi", "IV"].map(roman),
@@ -53,19 +53,19 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case "setTuning":
       return { ...state, settings: { ...settings, tuning: action.tuning }, pins: {} };
     case "setCapo": {
-      let tonic = settings.tonic;
-      if (action.hold === "shapes") {
-        const played = shapeKey(keyOf(settings.tonic, settings.scale), settings.capo);
+      let tonic = settings.soundingTonic;
+      if (action.hold === "keepShapes") {
+        const played = shapeKey(keyOf(settings.soundingTonic, settings.scale), settings.capo);
         tonic = pcOf(soundingKey(played, action.capo).tonic);
       }
-      return rekey(state, { ...settings, capo: action.capo, tonic });
+      return rekeyClearingPicks(state, { ...settings, capo: action.capo, soundingTonic: tonic });
     }
     case "setKey": {
       const tonic =
         action.frame === "sounding"
           ? action.tonic
           : pcOf(soundingKey(keyOf(action.tonic, action.scale), settings.capo).tonic);
-      return rekey(state, { ...settings, tonic, scale: action.scale });
+      return rekeyClearingPicks(state, { ...settings, soundingTonic: tonic, scale: action.scale });
     }
     case "setLabels":
       return { ...state, settings: { ...settings, labels: action.labels } };
@@ -106,8 +106,8 @@ export function appReducer(state: AppState, action: AppAction): AppState {
   }
 }
 
-function rekey(state: AppState, settings: Settings): AppState {
-  const sameKey = settings.tonic === state.settings.tonic && settings.scale === state.settings.scale;
+function rekeyClearingPicks(state: AppState, settings: Settings): AppState {
+  const sameKey = settings.soundingTonic === state.settings.soundingTonic && settings.scale === state.settings.scale;
   return { ...state, settings, pins: {}, selected: sameKey ? state.selected : null };
 }
 
@@ -129,7 +129,7 @@ export function encodeSettings(s: Settings): string {
   const params = new URLSearchParams({
     t: tuningText(s.tuning).replace(/ /g, "."),
     c: String(s.capo),
-    k: String(s.tonic),
+    k: String(s.soundingTonic),
     s: s.scale,
     l: s.labels,
     p: s.progression.map(formatRoman).join(","),
@@ -152,13 +152,13 @@ export function decodeSettings(hash: string): Settings {
   const p = params.get("p");
 
   const capo = c !== null && /^\d+$/.test(c) && Number(c) <= 12 ? asCapo(Number(c)) : d.capo;
-  const tonic = k !== null && /^\d+$/.test(k) && Number(k) < 12 ? pc(Number(k)) : d.tonic;
+  const tonic = k !== null && /^\d+$/.test(k) && Number(k) < 12 ? pc(Number(k)) : d.soundingTonic;
   const progression = p === null ? d.progression : parseProgression(p) ?? d.progression;
 
   return {
     tuning: tuned?.ok ? tuned.value : d.tuning,
     capo,
-    tonic,
+    soundingTonic: tonic,
     scale: s !== null && isScaleId(s) ? s : d.scale,
     labels: LABEL_MODES.find((m) => m === l) ?? d.labels,
     progression,

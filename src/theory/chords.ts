@@ -7,31 +7,31 @@ import { degreeLabel, harmonyOf, type Degree, type Key } from "./scales";
 interface QualitySource {
   readonly symbol: string;
   readonly formula: string;
-  readonly optional: string;
-  readonly roman: { readonly upper: boolean | null; readonly suffix: string };
+  readonly droppable: string;
+  readonly roman: { readonly numeralCase: "upper" | "lower" | "either"; readonly suffix: string };
   readonly kind: "triad" | "color";
 }
 
 const QUALITY_SOURCE = {
-  maj: { symbol: "", formula: "1 3 5", optional: "", roman: { upper: true, suffix: "" }, kind: "triad" },
-  min: { symbol: "m", formula: "1 b3 5", optional: "", roman: { upper: false, suffix: "" }, kind: "triad" },
-  dim: { symbol: "dim", formula: "1 b3 b5", optional: "", roman: { upper: false, suffix: "°" }, kind: "triad" },
-  aug: { symbol: "aug", formula: "1 3 #5", optional: "", roman: { upper: true, suffix: "+" }, kind: "triad" },
-  "5": { symbol: "5", formula: "1 5", optional: "", roman: { upper: null, suffix: "5" }, kind: "color" },
-  sus2: { symbol: "sus2", formula: "1 2 5", optional: "", roman: { upper: null, suffix: "sus2" }, kind: "color" },
-  sus4: { symbol: "sus4", formula: "1 4 5", optional: "", roman: { upper: null, suffix: "sus4" }, kind: "color" },
-  add9: { symbol: "add9", formula: "1 3 5 9", optional: "5", roman: { upper: true, suffix: "add9" }, kind: "color" },
-  madd9: { symbol: "madd9", formula: "1 b3 5 9", optional: "5", roman: { upper: false, suffix: "add9" }, kind: "color" },
-  add11: { symbol: "add11", formula: "1 3 5 11", optional: "5", roman: { upper: true, suffix: "add11" }, kind: "color" },
-  "6": { symbol: "6", formula: "1 3 5 6", optional: "5", roman: { upper: true, suffix: "6" }, kind: "color" },
-  m6: { symbol: "m6", formula: "1 b3 5 6", optional: "5", roman: { upper: false, suffix: "6" }, kind: "color" },
-  maj7: { symbol: "maj7", formula: "1 3 5 7", optional: "5", roman: { upper: true, suffix: "maj7" }, kind: "color" },
-  m7: { symbol: "m7", formula: "1 b3 5 b7", optional: "5", roman: { upper: false, suffix: "7" }, kind: "color" },
-  "7": { symbol: "7", formula: "1 3 5 b7", optional: "5", roman: { upper: true, suffix: "7" }, kind: "color" },
-  m7b5: { symbol: "m7♭5", formula: "1 b3 b5 b7", optional: "", roman: { upper: false, suffix: "ø7" }, kind: "color" },
-  maj9: { symbol: "maj9", formula: "1 3 5 7 9", optional: "5", roman: { upper: true, suffix: "maj9" }, kind: "color" },
-  m9: { symbol: "m9", formula: "1 b3 5 b7 9", optional: "5", roman: { upper: false, suffix: "9" }, kind: "color" },
-  maj7s11: { symbol: "maj7♯11", formula: "1 3 5 7 #11", optional: "5", roman: { upper: true, suffix: "maj7#11" }, kind: "color" },
+  maj: { symbol: "", formula: "1 3 5", droppable: "", roman: { numeralCase: "upper", suffix: "" }, kind: "triad" },
+  min: { symbol: "m", formula: "1 b3 5", droppable: "", roman: { numeralCase: "lower", suffix: "" }, kind: "triad" },
+  dim: { symbol: "dim", formula: "1 b3 b5", droppable: "", roman: { numeralCase: "lower", suffix: "°" }, kind: "triad" },
+  aug: { symbol: "aug", formula: "1 3 #5", droppable: "", roman: { numeralCase: "upper", suffix: "+" }, kind: "triad" },
+  "5": { symbol: "5", formula: "1 5", droppable: "", roman: { numeralCase: "either", suffix: "5" }, kind: "color" },
+  sus2: { symbol: "sus2", formula: "1 2 5", droppable: "", roman: { numeralCase: "either", suffix: "sus2" }, kind: "color" },
+  sus4: { symbol: "sus4", formula: "1 4 5", droppable: "", roman: { numeralCase: "either", suffix: "sus4" }, kind: "color" },
+  add9: { symbol: "add9", formula: "1 3 5 9", droppable: "5", roman: { numeralCase: "upper", suffix: "add9" }, kind: "color" },
+  madd9: { symbol: "madd9", formula: "1 b3 5 9", droppable: "5", roman: { numeralCase: "lower", suffix: "add9" }, kind: "color" },
+  add11: { symbol: "add11", formula: "1 3 5 11", droppable: "5", roman: { numeralCase: "upper", suffix: "add11" }, kind: "color" },
+  "6": { symbol: "6", formula: "1 3 5 6", droppable: "5", roman: { numeralCase: "upper", suffix: "6" }, kind: "color" },
+  m6: { symbol: "m6", formula: "1 b3 5 6", droppable: "5", roman: { numeralCase: "lower", suffix: "6" }, kind: "color" },
+  maj7: { symbol: "maj7", formula: "1 3 5 7", droppable: "5", roman: { numeralCase: "upper", suffix: "maj7" }, kind: "color" },
+  m7: { symbol: "m7", formula: "1 b3 5 b7", droppable: "5", roman: { numeralCase: "lower", suffix: "7" }, kind: "color" },
+  "7": { symbol: "7", formula: "1 3 5 b7", droppable: "5", roman: { numeralCase: "upper", suffix: "7" }, kind: "color" },
+  m7b5: { symbol: "m7♭5", formula: "1 b3 b5 b7", droppable: "", roman: { numeralCase: "lower", suffix: "ø7" }, kind: "color" },
+  maj9: { symbol: "maj9", formula: "1 3 5 7 9", droppable: "5", roman: { numeralCase: "upper", suffix: "maj9" }, kind: "color" },
+  m9: { symbol: "m9", formula: "1 b3 5 b7 9", droppable: "5", roman: { numeralCase: "lower", suffix: "9" }, kind: "color" },
+  maj7s11: { symbol: "maj7♯11", formula: "1 3 5 7 #11", droppable: "5", roman: { numeralCase: "upper", suffix: "maj7#11" }, kind: "color" },
 } as const satisfies Record<string, QualitySource>;
 
 export type QualityId = keyof typeof QUALITY_SOURCE;
@@ -40,7 +40,7 @@ export interface QualityDef {
   readonly id: QualityId;
   readonly symbol: string;
   readonly intervals: readonly Interval[];
-  readonly optional: readonly Interval[];
+  readonly droppable: readonly Interval[];
   readonly roman: QualitySource["roman"];
   readonly kind: "triad" | "color";
 }
@@ -52,7 +52,7 @@ export const QUALITIES = Object.fromEntries(
       id,
       symbol: q.symbol,
       intervals: parseFormula(q.formula),
-      optional: q.optional ? parseFormula(q.optional) : [],
+      droppable: q.droppable ? parseFormula(q.droppable) : [],
       roman: q.roman,
       kind: q.kind,
     },

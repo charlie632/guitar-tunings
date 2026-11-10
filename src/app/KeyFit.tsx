@@ -46,7 +46,7 @@ export function KeyFit({ ex, dispatch }: { ex: Exploration; dispatch: Dispatch<A
               {f.ringing.length > 0 && (
                 <span className="chips" aria-label="Chords that ring open">
                   {f.ringing.slice(0, 6).map((r) => (
-                    <span key={r.name} className={`ringchip${r.outside ? " one" : ""}`} title={r.outside ? "One open string is outside this chord" : "Every open string is in this chord"}>
+                    <span key={r.name} className={`ringchip${r.openStringsOutside ? " one" : ""}`} title={r.openStringsOutside ? "One open string is outside this chord" : "Every open string is in this chord"}>
                       {r.name}
                     </span>
                   ))}

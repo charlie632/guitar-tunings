@@ -54,7 +54,7 @@ describe("chord tones", () => {
       const q = QUALITIES[id];
       expect(q.intervals[0]).toEqual({ steps: 0, semis: 0 });
       expect(new Set(q.intervals.map((i) => i.semis % 12)).size).toBe(q.intervals.length);
-      for (const o of q.optional) expect(q.intervals).toContainEqual(o);
+      for (const o of q.droppable) expect(q.intervals).toContainEqual(o);
     }
   });
 });

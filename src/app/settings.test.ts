@@ -11,14 +11,14 @@ const roman = (t: string): RomanChord => {
 };
 const run = (s: AppState, ...actions: AppAction[]) => actions.reduce(appReducer, s);
 const fresh = () => initAppState("");
-const soundingName = (s: AppState) => keyOf(s.settings.tonic, s.settings.scale).name;
+const soundingName = (s: AppState) => keyOf(s.settings.soundingTonic, s.settings.scale).name;
 
 describe("URL codec", () => {
   test("round-trips every field, including a custom tuning and borrowed numerals", () => {
     const custom = parseTuning("D A D F# A C#");
     if (!custom.ok) throw new Error("setup");
     const settings = {
-      tuning: custom.value, capo: 5 as const, tonic: pc(9), scale: "dorian" as const, labels: "degree" as const,
+      tuning: custom.value, capo: 5 as const, soundingTonic: pc(9), scale: "dorian" as const, labels: "degree" as const,
       progression: ["i", "bVII", "IVmaj7", "iiø7", "I+"].map(roman),
     };
     const back = decodeSettings("#" + encodeSettings(settings));
@@ -32,7 +32,7 @@ describe("URL codec", () => {
     const mixed = decodeSettings("#c=3&s=lydian&k=banana&p=I,V");
     expect(mixed.capo).toBe(3);
     expect(mixed.scale).toBe("lydian");
-    expect(mixed.tonic).toBe(DEFAULT_SETTINGS.tonic);
+    expect(mixed.soundingTonic).toBe(DEFAULT_SETTINGS.soundingTonic);
     expect(mixed.progression).toHaveLength(2);
   });
 
@@ -54,32 +54,32 @@ describe("capo and key actions", () => {
   test("setKey in the shape frame adds the capo through soundingKey: D shapes with capo 1 store E♭", () => {
     const s = run(
       fresh(),
-      { type: "setCapo", capo: 1, hold: "sound" },
+      { type: "setCapo", capo: 1, hold: "keepSound" },
       { type: "setKey", tonic: pc(2), scale: "major", frame: "shape" },
     );
     expect(soundingName(s)).toBe("E♭ major");
-    expect(s.settings.tonic).toBe(3);
+    expect(s.settings.soundingTonic).toBe(3);
   });
 
   test("hold sound: moving the capo keeps the sounding key", () => {
-    const s = run(fresh(), { type: "setCapo", capo: 3, hold: "sound" });
-    expect(s.settings.tonic).toBe(2);
+    const s = run(fresh(), { type: "setCapo", capo: 3, hold: "keepSound" });
+    expect(s.settings.soundingTonic).toBe(2);
     expect(s.settings.capo).toBe(3);
   });
 
   test("hold shapes: moving the capo keeps the played shapes and the sound moves", () => {
-    const s = run(fresh(), { type: "setCapo", capo: 2, hold: "shapes" });
+    const s = run(fresh(), { type: "setCapo", capo: 2, hold: "keepShapes" });
     expect(soundingName(s)).toBe("E major");
-    const again = run(s, { type: "setCapo", capo: 5, hold: "shapes" });
+    const again = run(s, { type: "setCapo", capo: 5, hold: "keepShapes" });
     expect(soundingName(again)).toBe("G major");
-    const back = run(again, { type: "setCapo", capo: 0, hold: "shapes" });
+    const back = run(again, { type: "setCapo", capo: 0, hold: "keepShapes" });
     expect(soundingName(back)).toBe("D major");
   });
 
   test("changing the key clears the selected chord; changing the capo with sound held keeps it", () => {
     const chord: Chord = { root: { letter: 1, alter: 0 }, quality: "maj" };
     const picked = run(fresh(), { type: "select", chord });
-    expect(run(picked, { type: "setCapo", capo: 2, hold: "sound" }).selected).toEqual(chord);
+    expect(run(picked, { type: "setCapo", capo: 2, hold: "keepSound" }).selected).toEqual(chord);
     expect(run(picked, { type: "setKey", tonic: pc(4), scale: "major", frame: "sounding" }).selected).toBeNull();
   });
 });

@@ -12,9 +12,9 @@ import { VoicingPanel } from "./VoicingPanel";
 
 export function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, () => initAppState(window.location.hash));
-  const [hold, setHold] = useState<CapoHold>("sound");
+  const [hold, setHold] = useState<CapoHold>("keepSound");
   const { settings } = state;
-  const { tuning, capo, tonic, scale } = settings;
+  const { tuning, capo, soundingTonic: tonic, scale } = settings;
 
   const ex = useMemo(() => explore({ tuning, capo, tonic, scale }), [tuning, capo, tonic, scale]);
   const player = usePlayer();

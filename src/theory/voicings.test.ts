@@ -42,7 +42,7 @@ describe("generateVoicings", () => {
           for (const c of [row.triad, ...row.colors]) {
             const q = QUALITIES[c.quality];
             const required = q.intervals
-              .filter((iv) => !q.optional.some((o) => o.semis === iv.semis))
+              .filter((iv) => !q.droppable.some((o) => o.semis === iv.semis))
               .map((iv) => pc(pcOf(c.root) + iv.semis));
             for (const v of generateVoicings(c, ins)) {
               const fretted = v.frets.filter((f): f is NonNullable<typeof f> => f !== null && f > 0);

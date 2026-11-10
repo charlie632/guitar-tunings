@@ -65,11 +65,11 @@ export function generateVoicings(
   const quality = QUALITIES[chord.quality];
   const required = new Set(
     quality.intervals
-      .filter((iv) => !quality.optional.some((o) => o.semis === iv.semis))
+      .filter((iv) => !quality.droppable.some((o) => o.semis === iv.semis))
       .map((iv) => pc(rootPc + iv.semis)),
   );
 
-  const n = ins.open.length;
+  const n = ins.soundingOpen.length;
   const maxFret = ins.maxFret;
   const out: Voicing[] = [];
   const cur: (number | null)[] = new Array<number | null>(n).fill(null);
@@ -78,9 +78,9 @@ export function generateVoicings(
     const options: (number | null)[][] = [];
     for (let s = 0; s < n; s++) {
       const opts: (number | null)[] = [null];
-      if (roleByPc.has(pc(ins.open[s]!))) opts.push(0);
+      if (roleByPc.has(pc(ins.soundingOpen[s]!))) opts.push(0);
       for (let f = w; f <= Math.min(w + limits.maxSpan - 1, maxFret); f++) {
-        if (roleByPc.has(pc(ins.open[s]! + f))) opts.push(f);
+        if (roleByPc.has(pc(ins.soundingOpen[s]! + f))) opts.push(f);
       }
       options.push(opts);
     }
@@ -97,7 +97,7 @@ export function generateVoicings(
         const f = cur[s];
         if (f === null || f === undefined) continue;
         sounding++;
-        const p = pc(ins.open[s]! + f);
+        const p = pc(ins.soundingOpen[s]! + f);
         pcs.add(p);
         if (bassPc < 0) bassPc = p;
         if (f === 0) open++;
@@ -148,7 +148,7 @@ export function generateVoicings(
         id: cur.map((f) => (f === null ? "x" : f)).join(","),
         frets: cur.slice() as FretPattern,
         tones: cur.map((f, s) =>
-          f === null ? null : { midi: (ins.open[s]! + f) as Midi, role: roleByPc.get(pc(ins.open[s]! + f))!, pc: pc(ins.open[s]! + f) },
+          f === null ? null : { midi: (ins.soundingOpen[s]! + f) as Midi, role: roleByPc.get(pc(ins.soundingOpen[s]! + f))!, pc: pc(ins.soundingOpen[s]! + f) },
         ),
         bass: bassPc as Pc,
         barre,
@@ -180,13 +180,13 @@ export function generateVoicings(
   for (const v of out) {
     let same = byBass.get(v.bass);
     if (!same) byBass.set(v.bass, (same = []));
-    if (same.some((k) => thinnerCopy(v, k))) continue;
+    if (same.some((k) => isThinnerCopyOf(v, k))) continue;
     kept.push(v);
     same.push(v);
   }
   return kept;
 }
 
-function thinnerCopy(v: Voicing, k: Voicing): boolean {
-  return v.frets.every((f, s) => f === null || f === k.frets[s]);
+function isThinnerCopyOf(thinner: Voicing, full: Voicing): boolean {
+  return thinner.frets.every((f, s) => f === null || f === full.frets[s]);
 }
