@@ -16,7 +16,7 @@ describe("App on DADF♯Ae in D major", () => {
     expect(board.getByText(/DADF♯Ae, D major/)).toBeTruthy();
     expect(board.getAllByRole("button", { name: /tonic/ }).length).toBeGreaterThan(5);
 
-    const fits = panel(/Keys that ring/);
+    const fits = panel(/Best keys for this tuning/);
     expect(fits.getAllByRole("button")[0]!.textContent).toContain("D major");
     expect(fits.getByText("6/6 open strings in key, 5 in the tonic chord, low string is the root")).toBeTruthy();
 
@@ -33,7 +33,7 @@ describe("App on DADF♯Ae in D major", () => {
     ]);
     expect(prog.getByRole("button", { name: "Play loop" })).toBeTruthy();
 
-    expect(panel(/Capo, both directions/).getByText("No capo: the open strings sound as tuned.")).toBeTruthy();
+    expect(panel(/^Capo$/).getByText("No capo, so the open strings sound as tuned.")).toBeTruthy();
   });
 
   test("picking the Dadd9 chip shows the all-open voicing with its badge", () => {
@@ -48,7 +48,7 @@ describe("App on DADF♯Ae in D major", () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: "Capo up one fret" }));
     fireEvent.click(screen.getByRole("button", { name: "Capo up one fret" }));
-    expect(panel(/Capo, both directions/).getByText(/Capo 2 raises every open string 2 semitones/)).toBeTruthy();
+    expect(panel(/^Capo$/).getByText(/Capo 2 raises every open string 2 semitones/)).toBeTruthy();
     expect(panel(/Chords in D major/).getAllByText("C shape").length).toBeGreaterThan(0);
   });
 

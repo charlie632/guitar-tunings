@@ -52,7 +52,7 @@ export function ProgressionPanel({ ex, romans, pins, dispatch, player }: Props) 
     <section className="panel" aria-labelledby="prog-h">
       <h2 id="prog-h">Progressions</h2>
       <p className="sub">
-        Load a template or build your own from the + buttons on the chord chips. Voicings are chosen together so your hand moves as little as possible, and the loop closes back on the first chord.
+        Load a template or build your own from the + buttons on the chord chips. The app picks voicings that keep your hand movement small, counting the move from the last chord back to the first.
       </p>
 
       <h3 style={{ margin: "0 0 6px", fontSize: "0.95rem" }}>Your progression in {ex.key.name}</h3>

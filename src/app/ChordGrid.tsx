@@ -39,7 +39,7 @@ export function ChordGrid({ ex, selected, dispatch }: Props) {
     <section className="panel" aria-labelledby="chords-h">
       <h2 id="chords-h">Chords in {ex.key.name}</h2>
       <p className="sub">
-        Numerals count from the major scale, so in minor you will see i, ♭III, iv, v, ♭VI, ♭VII. Click a chord for shapes, + to add it to a progression.
+        Numerals count from the major scale, so in minor you see i, ♭III, iv, v, ♭VI, ♭VII. Click a chord for shapes, + to add it to a progression.
         {ex.capo > 0 && ` Under the capo each chord shows the shape you fret.`}
       </p>
       <div className="chordrows">

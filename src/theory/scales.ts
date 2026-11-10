@@ -6,47 +6,47 @@ import {
 const SCALE_SOURCE = {
   major: {
     name: "Major", formula: "1 2 3 4 5 6 7",
-    feel: "Bright and resolved. The home of pop-punk and twinkly emo.",
+    feel: "The reference scale. Numerals and degrees count from it.",
   },
   minor: {
     name: "Natural minor", formula: "1 2 b3 4 5 b6 b7",
-    feel: "Sad and heavy without sounding classical.",
+    feel: "Major with b3, b6 and b7. Same notes as the major key a minor 3rd up.",
   },
   dorian: {
     name: "Dorian", formula: "1 2 b3 4 5 6 b7",
-    feel: "Minor with a hopeful raised 6th.",
+    feel: "Natural minor with a natural 6th, which makes IV a major chord.",
   },
   mixolydian: {
     name: "Mixolydian", formula: "1 2 3 4 5 6 b7",
-    feel: "Major with a flat 7: bright but unresolved. Open-string drone riffs live here.",
+    feel: "Major with a b7, which makes bVII a major chord.",
   },
   lydian: {
     name: "Lydian", formula: "1 2 3 #4 5 6 7",
-    feel: "Floating and dreamy. The raised 4th is the shimmer.",
+    feel: "Major with a #4, which makes II a major chord.",
   },
   phrygian: {
     name: "Phrygian", formula: "1 b2 b3 4 5 b6 b7",
-    feel: "Dark and tense, pulled down by the flat 2.",
+    feel: "Natural minor with a b2, which puts a major chord a half step above home.",
   },
   locrian: {
     name: "Locrian", formula: "1 b2 b3 4 b5 b6 b7",
-    feel: "Unstable. The flat 5 means the tonic chord never settles.",
+    feel: "Minor with b2 and b5. The tonic chord is diminished.",
   },
   harmonicMinor: {
     name: "Harmonic minor", formula: "1 2 b3 4 5 b6 7",
-    feel: "Minor with a leading tone: dramatic, a little gothic.",
+    feel: "Natural minor with a natural 7th, which makes V a major chord.",
   },
   melodicMinor: {
     name: "Melodic minor", formula: "1 2 b3 4 5 6 7",
-    feel: "Minor with bright 6th and 7th. Wistful rather than sad.",
+    feel: "Major with a b3. Natural minor with natural 6th and 7th.",
   },
   majorPentatonic: {
     name: "Major pentatonic", formula: "1 2 3 5 6", harmonyFrom: "major",
-    feel: "Major with the two tense notes removed. Hard to play wrong.",
+    feel: "Major without the 4th and 7th, so no two notes sit a half step apart.",
   },
   minorPentatonic: {
     name: "Minor pentatonic", formula: "1 b3 4 5 b7", harmonyFrom: "minor",
-    feel: "The riff scale: minor without the 2nd and 6th.",
+    feel: "Natural minor without the 2nd and 6th. Most rock and blues riffs use it.",
   },
 } as const;
 

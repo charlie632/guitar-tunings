@@ -1,13 +1,13 @@
 # Design
 
-This is the synthesized design for Tuning Explorer: the base design, the amendments applied on top of it, and where the implementation departs from both. Read it before changing `src/theory`.
+This is the design for Tuning Explorer. It covers the base design, the amendments on top of it, and where the code departs from both. Read it before changing `src/theory`.
 
 ## The problem
 
-A guitarist plays by feel in seven alternate tunings and wants to learn the theory underneath. Three things make the shape non-obvious.
+A guitarist plays by feel in seven alternate tunings and wants to learn the theory underneath. Three things make it harder than it looks.
 
 1. Spelling has to be right per key (A♯ in F♯ major, B♭ in B♭ major, C for ♭VI in E). Pitch-class integers cannot express that.
-2. The capo puts two frames on every fact: what sounds and what the hands play. Mixing them is the likeliest bug in any guitar app.
+2. The capo puts two frames on every fact: what sounds and what the hands play. Mixing them up is the most likely bug in any guitar app.
 3. Voicings must be generated for arbitrary tunings, then ranked so the tuning's ringing open strings come first.
 
 ## Data shape (decided, not up for change)
@@ -54,7 +54,7 @@ Algorithms in brief:
 8. Pure playback schedule in `theory/schedule.ts`. The player only renders events.
 9. Cyclic voice leading.
 10. `ringingChords` on `KeyFit`: diatonic chords with at most one open string outside them.
-11. The capo sentence ("Capo 2 raises every open string 2 semitones: ...") on the `Exploration`.
+11. The capo sentence ("Capo 2 raises every open string 2 semitones. ...") on the `Exploration`.
 12. Alternatives and an ephemeral pin per progression step. Pins live in `AppState`, not the URL, and a stale id is ignored.
 13. `movement` total on the resolved progression.
 14. `easyChords` on the top three capo options only, and not used for ranking.
