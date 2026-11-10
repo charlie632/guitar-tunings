@@ -289,6 +289,7 @@ input[aria-invalid="true"] { border-color: var(--bad); }
   border-radius: 10px; padding: 10px 12px;
 }
 .fit[aria-current="true"] { border-color: var(--accent); }
+.fit-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; }
 .fit h3 { margin: 0; font-size: 1rem; }
 .fit p { margin: 0; color: var(--muted); font-size: 0.86rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 4px; }
