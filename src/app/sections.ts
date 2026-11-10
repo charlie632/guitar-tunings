@@ -1,14 +1,16 @@
-export const SECTIONS = [
-  { id: "fretboard", label: "Fretboard" },
-  { id: "chords", label: "Chords" },
-  { id: "voicings", label: "Voicings" },
-  { id: "progressions", label: "Progressions" },
-] as const;
+export const SECTION_LABELS = {
+  fretboard: "Fretboard",
+  chords: "Chords",
+  voicings: "Voicings",
+  progressions: "Progressions",
+} as const;
 
-export type Section = (typeof SECTIONS)[number]["id"];
+export type Section = keyof typeof SECTION_LABELS;
+
+export const SECTIONS = Object.keys(SECTION_LABELS) as Section[];
 
 export const DEFAULT_SECTION: Section = "fretboard";
 
 export function isSection(s: string | null): s is Section {
-  return SECTIONS.some((x) => x.id === s);
+  return s !== null && Object.hasOwn(SECTION_LABELS, s);
 }

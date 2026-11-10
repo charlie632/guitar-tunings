@@ -7,7 +7,8 @@ import { Controls, type CapoHold } from "./Controls";
 import { Fretboard } from "./Fretboard";
 import { KeyFit } from "./KeyFit";
 import { ProgressionPanel } from "./ProgressionPanel";
-import { SECTIONS, type Section } from "./sections";
+import { Rail } from "./Rail";
+import { SECTION_LABELS, type Section } from "./sections";
 import { appReducer, encodeHash, initAppState } from "./settings";
 import { usePlayer } from "./usePlayer";
 import { VoicingPanel } from "./VoicingPanel";
@@ -15,7 +16,6 @@ import { VoicingPanel } from "./VoicingPanel";
 export function App() {
   const [state, dispatch] = useReducer(appReducer, undefined, () => initAppState(window.location.hash));
   const [hold, setHold] = useState<CapoHold>("keepSound");
-  const [setupOpen, setSetupOpen] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
   const { settings, section } = state;
   const { tuning, capo, soundingTonic: tonic, scale } = settings;
@@ -107,26 +107,11 @@ export function App() {
         </a>
       </header>
 
-      <aside className="rail" data-open={setupOpen}>
-        <nav className="sections" aria-label="Sections">
-          <ul>
-            {SECTIONS.map((s) => (
-              <li key={s.id}>
-                <a aria-current={s.id === section ? "page" : undefined} {...sectionLink(s.id, false)}>{s.label}</a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <button className="summary" aria-expanded={setupOpen} aria-controls="setup" onClick={() => setSetupOpen(!setupOpen)}>
-          <span className="summary-v">{tuning.label} · {ex.key.name} · capo {capo}</span>
-          <span className="summary-k">{setupOpen ? "Done" : "Change"}</span>
-        </button>
-        <div id="setup" className="setup">
-          <Controls settings={settings} ex={ex} hold={hold} onHold={setHold} dispatch={dispatch} />
-        </div>
-      </aside>
+      <Rail section={section} link={(to) => sectionLink(to, false)} summary={`${tuning.label} · ${ex.key.name} · capo ${capo}`}>
+        <Controls settings={settings} ex={ex} hold={hold} onHold={setHold} dispatch={dispatch} />
+      </Rail>
 
-      <main ref={mainRef} className="main" tabIndex={-1} aria-label={SECTIONS.find((s) => s.id === section)!.label}>
+      <main ref={mainRef} className="main" tabIndex={-1} aria-label={SECTION_LABELS[section]}>
         {panels()}
         <footer>Settings and the open section live in the URL, so copy the address to share this view. Your browser synthesizes the sound.</footer>
       </main>
