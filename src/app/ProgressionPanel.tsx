@@ -53,12 +53,12 @@ export function ProgressionPanel({ ex, romans, pins, dispatch, player, onOpenCho
     <section className="panel" aria-labelledby="prog-h">
       <h2 id="prog-h">Progressions</h2>
       <p className="sub">
-        Load a template or build your own from the + buttons on the chord chips. The app picks voicings that keep your hand movement small, counting the move from the last chord back to the first.
+        Load a template, type a numeral, or add chords with the + buttons in the Chords section. The app picks voicings that keep your hand movement small, counting the move from the last chord back to the first. Click a chord name to see all its voicings.
       </p>
 
       <h3 style={{ margin: "0 0 6px", fontSize: "0.95rem" }}>Your progression in {ex.key.name}</h3>
       {prog.steps.length === 0 ? (
-        <p className="hint">Empty. Add chords with + in the chord list, type a numeral below, or load a template.</p>
+        <p className="hint">Empty. Load a template, type a numeral below, or add chords with + in the Chords section.</p>
       ) : (
         <ol className="steps">
           {prog.steps.map((s, i) => {
